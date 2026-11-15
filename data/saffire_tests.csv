@@ -1,0 +1,10 @@
+test_id,investigation,material,sample_width_cm,sample_length_cm,thickness_mm,flow_cm_s,flow_direction,oxygen_vol_pct,oxygen_note,duration_s,spread_rate_mm_s,documented_outcome,source_note
+1-1,Saffire-I,Cotton / fiberglass,40.6,94,0.37,20,Not specified,21.7,Initial,420,1.8,Burned length about 84 cm,Ferkul et al. (2017)
+1-2,Saffire-I,Cotton / fiberglass,,10,,20,Opposed,21.5,Approximate,70,1.3,Approximate sample length 10 cm,Ferkul et al. (2017)
+2-1,Saffire-II,Silicone,,,,20,Not specified,,,,,No sustained spread,Ferkul et al. (2017)
+2-2,Saffire-II,Silicone,,,,20,Not specified,,,,,No sustained spread,Ferkul et al. (2017)
+2-3,Saffire-II,Silicone,,,,20,Not specified,,,,,No sustained spread,Ferkul et al. (2017)
+2-4,Saffire-II,Silicone,,,,20,Not specified,,,,,No sustained spread,Ferkul et al. (2017)
+2-5,Saffire-II,Cotton / fiberglass,5,29,0.37,20,Not specified,22.1,Approximate,145,2.1,Spread rate reported,Ferkul et al. (2017)
+2-6,Saffire-II,Cotton / fiberglass,5,29,0.37,25,Not specified,22.1,Approximate,115,2.6,Spread rate reported,Ferkul et al. (2017)
+2-7,Saffire-II,PMMA and Nomex composite,,,,20,Not specified,,,140,,PMMA 5 cm segment burned; Nomex did not ignite,Ferkul et al. (2017)

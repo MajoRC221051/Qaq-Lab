@@ -1,0 +1,10 @@
+study,material,descriptor,base_nm,aged_720s_nm,source_note
+SAME,Kapton,Mass-mean diameter,179,267,Urban et al. (2010; 2012)
+SAME,Cotton wick,Mass-mean diameter,341,438,Urban et al. (2010; 2012)
+SAME,Silicone,Mass-mean diameter,472,606,Urban et al. (2010; 2012)
+SAME,Teflon,Mass-mean diameter,297,392,Urban et al. (2010; 2012)
+SAME-R,Kapton,Mass-mean diameter,101,161,Urban et al. (2012)
+SAME-R,Cotton wick,Mass-mean diameter,258,398,Urban et al. (2012)
+SAME-R,Silicone,Mass-mean diameter,465,619,Urban et al. (2012)
+SAME-R,Teflon,Mass-mean diameter,170,232,Urban et al. (2012)
+SAME-R,Pyrell,Mass-mean diameter,384,539,Urban et al. (2012)
