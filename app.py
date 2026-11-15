@@ -16,6 +16,7 @@ ASSETS_DIR = BASE_DIR / "assets"
 DATA_DIR = BASE_DIR / "data"
 INVESTIGATIONS_PATH = DATA_DIR / "investigations.csv"
 BASSII_TESTS_PATH = DATA_DIR / "bassii_sibal_tests_EN.csv"
+ACCIDENT_CASES_PATH = DATA_DIR / "accident_cases.csv"
 
 BASSII_REPORT_URL = "https://ntrs.nasa.gov/citations/20210011385"
 SAME_PSI_URL = "https://psi.nasa.gov/physci/repo/data/investigations/PSI-102"
@@ -190,6 +191,31 @@ a.nav-item:hover { color: var(--text); }
 .documentary-panel h2 { color: var(--text); font-size: 1.25rem; margin-bottom: 12px; }
 .documentary-panel p { color: #cfcfcc; margin-bottom: 12px; }
 
+.cases-header { padding: 64px 0 32px; }
+.cases-header h1 { color: var(--text); font-size: clamp(2.2rem, 4vw, 3.6rem); line-height: 1.08;
+  margin-bottom: 18px; }
+.cases-header p { color: var(--muted); max-width: 54rem; font-size: 1.04rem; }
+.case-count { color: var(--muted); font-size: 0.9rem; margin: 28px 0 14px; }
+.case-card { background: var(--card); border: 1px solid var(--border); border-radius: 22px;
+  padding: 34px; margin-top: 18px; }
+.case-card h2 { color: var(--text); font-size: clamp(1.55rem, 3vw, 2.15rem); line-height: 1.15;
+  margin: 0 0 14px; }
+.case-card h3 { color: var(--text); font-size: 1rem; margin: 0 0 9px; }
+.case-card p { color: #cfcfcc; font-size: 0.91rem; margin: 0; }
+.case-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 26px; }
+.case-tag { color: #c9c9c6; background: #101010; border: 1px solid var(--border);
+  border-radius: 999px; padding: 5px 11px; font-size: 0.73rem; }
+.case-overview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 26px; }
+.case-overview-item { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 14px;
+  padding: 16px; }
+.case-section { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px; }
+.case-list { display: grid; gap: 8px; }
+.case-list-item { color: #cfcfcc; background: #101010; border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 13px; font-size: 0.86rem; }
+.psi-connection { background: linear-gradient(135deg, rgba(242,92,5,0.09), rgba(26,26,26,1) 60%);
+  border: 1px solid rgba(242,92,5,0.28); border-radius: 16px; padding: 20px; }
+.evidence-boundary { color: var(--muted) !important; font-size: 0.84rem !important; }
+
 div[data-testid="stTextInput"] input { background: var(--bg-soft); color: var(--text);
   border: 1px solid var(--border); }
 div[data-testid="stNumberInput"] input { background: var(--bg-soft); color: var(--text);
@@ -206,13 +232,13 @@ div[data-testid="stButton"] button:hover { background: var(--ember-light); color
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; gap: 36px; min-height: auto; padding: 36px 0; }
-  .grid3, .grid4, .grid5, .detail-grid, .evidence-summary { grid-template-columns: 1fr; }
+  .grid3, .grid4, .grid5, .detail-grid, .evidence-summary, .case-overview { grid-template-columns: 1fr; }
   .about, .scope, .detail-panel { padding: 28px; }
   .nav-links { gap: 16px 20px; }
 }
 @media (min-width: 901px) and (max-width: 1100px) {
   .grid4, .grid5 { grid-template-columns: repeat(2, 1fr); }
-  .detail-grid, .evidence-summary { grid-template-columns: repeat(2, 1fr); }
+  .detail-grid, .evidence-summary, .case-overview { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 """
@@ -247,6 +273,7 @@ def render_nav(active_page: str) -> str:
     home_class = "nav-item active" if active_page == "home" else "nav-item"
     library_class = "nav-item active" if active_page == "library" else "nav-item"
     explorer_class = "nav-item active" if active_page == "explorer" else "nav-item"
+    accidents_class = "nav-item active" if active_page == "accidents" else "nav-item"
 
     return html(
         f"""
@@ -256,7 +283,7 @@ def render_nav(active_page: str) -> str:
             <a class="{home_class}" href="?page=home" target="_self">Home</a>
             <a class="{library_class}" href="?page=library" target="_self">Library</a>
             <a class="{explorer_class}" href="?page=explorer" target="_self">Experiment Explorer</a>
-            <span class="nav-item">Accident Cases <small>Planned</small></span>
+            <a class="{accidents_class}" href="?page=accidents" target="_self">Accident Cases</a>
             <span class="nav-item">Data Lab <small>Planned</small></span>
           </div>
         </div>
@@ -342,10 +369,10 @@ body = html(
           <h3>Experiment Explorer</h3>
           <p>Route a research question and review supporting evidence.</p>
         </div>
-        <div class="card plan off">
-          <span class="status">Planned</span>
+        <div class="card plan">
+          <span class="status on">Available</span>
           <h3>Accident Cases</h3>
-          <p>Review documented cases and their relevant variables.</p>
+          <p>Review documented incidents, operational factors, and evidence limits.</p>
         </div>
         <div class="card plan off">
           <span class="status">Planned</span>
@@ -479,6 +506,65 @@ def load_bassii_tests() -> pd.DataFrame:
         dataframe[column] = dataframe[column].fillna("").astype(str)
 
     return dataframe
+
+
+@st.cache_data(show_spinner=False)
+def load_accident_cases() -> pd.DataFrame:
+    if not ACCIDENT_CASES_PATH.is_file():
+        raise FileNotFoundError(
+            f"Missing file: {ACCIDENT_CASES_PATH}. "
+            "Place accident_cases.csv inside the data folder."
+        )
+
+    dataframe = pd.read_csv(
+        ACCIDENT_CASES_PATH,
+        keep_default_na=False,
+    )
+
+    required_columns = {
+        "case_id",
+        "title",
+        "event_date",
+        "setting",
+        "event_type",
+        "crew_affected",
+        "outcome",
+        "initiating_event",
+        "contributing_factors",
+        "operational_consequences",
+        "response_actions",
+        "research_focus",
+        "related_psi",
+        "relationship_type",
+        "psi_relation_note",
+        "evidence_level",
+        "interpretation_limit",
+        "source_title",
+        "source_url",
+    }
+
+    missing_columns = required_columns.difference(dataframe.columns)
+    if missing_columns:
+        missing_text = ", ".join(sorted(missing_columns))
+        raise ValueError(
+            f"Missing columns in accident_cases.csv: {missing_text}"
+        )
+
+    dataframe["crew_affected"] = (
+        pd.to_numeric(dataframe["crew_affected"], errors="coerce")
+        .fillna(0)
+        .astype(int)
+    )
+
+    return dataframe
+
+
+def split_pipe_values(value: object) -> list[str]:
+    return [
+        item.strip()
+        for item in str(value).split("|")
+        if item.strip()
+    ]
 
 
 FIELD_METADATA = {
@@ -1419,6 +1505,241 @@ def render_experiment_explorer() -> None:
     )
 
 
+def case_list(items: list[str]) -> str:
+    return "".join(
+        f'<div class="case-list-item">{escape(item)}</div>'
+        for item in items
+    )
+
+
+def accident_case_card(row: pd.Series) -> str:
+    factors = split_pipe_values(row["contributing_factors"])
+    consequences = split_pipe_values(row["operational_consequences"])
+    responses = split_pipe_values(row["response_actions"])
+    research_topics = split_pipe_values(row["research_focus"])
+
+    topic_tags = "".join(
+        f'<span class="case-tag">{escape(topic)}</span>'
+        for topic in research_topics
+    )
+
+    related_psi = str(row["related_psi"]).strip()
+    if related_psi == "BASS-II":
+        psi_link = (
+            '<a class="source-link" href="?page=library&amp;psi=PSI-25" '
+            'target="_self">View BASS-II in Library</a>'
+        )
+    elif related_psi == "SAME":
+        psi_link = (
+            '<a class="source-link" href="?page=library&amp;psi=PSI-102" '
+            'target="_self">View SAME in Library</a>'
+        )
+    else:
+        psi_link = ""
+
+    source_url = escape(str(row["source_url"]), quote=True)
+    event_date = escape(str(row["event_date"]))
+
+    return html(f"""
+    <div class="case-card">
+      <div class="psi-id">{escape(str(row['case_id']))} · {event_date}</div>
+      <h2>{escape(str(row['title']))}</h2>
+      <div class="case-meta">
+        <span class="case-tag">{escape(str(row['setting']))}</span>
+        <span class="case-tag">{escape(str(row['event_type']))}</span>
+        <span class="case-tag">{escape(str(row['evidence_level']))}</span>
+        {topic_tags}
+      </div>
+
+      <div class="case-overview">
+        <div class="case-overview-item">
+          <div class="detail-label">Initiating event</div>
+          <div class="detail-value">{escape(str(row['initiating_event']))}</div>
+        </div>
+        <div class="case-overview-item">
+          <div class="detail-label">People affected</div>
+          <div class="detail-value">{int(row['crew_affected'])}</div>
+        </div>
+        <div class="case-overview-item">
+          <div class="detail-label">Documented outcome</div>
+          <div class="detail-value">{escape(str(row['outcome']))}</div>
+        </div>
+      </div>
+
+      <div class="case-section">
+        <h3>Documented contributing factors</h3>
+        <div class="case-list">{case_list(factors)}</div>
+      </div>
+
+      <div class="case-section">
+        <h3>Operational consequences</h3>
+        <div class="case-list">{case_list(consequences)}</div>
+      </div>
+
+      <div class="case-section">
+        <h3>Response and recovery</h3>
+        <div class="case-list">{case_list(responses)}</div>
+      </div>
+
+      <div class="case-section psi-connection">
+        <h3>Connection to PSI evidence</h3>
+        <p><strong>{escape(str(row['relationship_type']))}</strong></p>
+        <p>{escape(str(row['psi_relation_note']))}</p>
+        <div class="card-actions">{psi_link}</div>
+      </div>
+
+      <div class="case-section">
+        <h3>Evidence boundary</h3>
+        <p class="evidence-boundary">{escape(str(row['interpretation_limit']))}</p>
+      </div>
+
+      <div class="card-actions">
+        <a class="source-link" href="{source_url}" target="_blank" rel="noopener noreferrer">Open official NASA source</a>
+      </div>
+    </div>
+    """)
+
+
+def render_accident_cases() -> None:
+    nav = render_nav("accidents")
+
+    try:
+        cases = load_accident_cases()
+    except (FileNotFoundError, ValueError) as error:
+        st.markdown(f'<div class="em">{nav}</div>', unsafe_allow_html=True)
+        st.error(str(error))
+        return
+
+    header = html(f"""
+    <div class="cases-header">
+      <div class="eyebrow">DOCUMENTED OPERATIONAL CONTEXT</div>
+      <h1>Accident Cases</h1>
+      <p>Explore documented spacecraft incidents and ground-test failures. Ember separates historical facts, operational lessons, and experimental evidence so case narratives are not treated as probabilities or training labels.</p>
+      <div class="dataset-strip">
+        <span class="dataset-stat">{len(cases)} NASA-documented cases</span>
+        <span class="dataset-stat">Historical evidence</span>
+        <span class="dataset-stat">No accident probabilities</span>
+      </div>
+    </div>
+    <div class="question-intro">
+      <h2>Choose a research context</h2>
+      <p>Filter the cases by operational setting, research focus, or connection to PSI evidence.</p>
+    </div>
+    """)
+
+    st.markdown(
+        f'<div class="em">{nav}{header}</div>',
+        unsafe_allow_html=True,
+    )
+
+    search_column, focus_column, setting_column = st.columns([1.4, 1, 1])
+
+    with search_column:
+        search = st.text_input(
+            "Search cases",
+            placeholder="Search by case, event, factor, or response",
+            key="accident_search",
+        )
+
+    focus_options = sorted(
+        {
+            topic
+            for value in cases["research_focus"]
+            for topic in split_pipe_values(value)
+        }
+    )
+    with focus_column:
+        selected_focus = st.selectbox(
+            "Research focus",
+            ["All", *focus_options],
+            key="accident_focus",
+        )
+
+    with setting_column:
+        selected_setting = st.selectbox(
+            "Operational setting",
+            ["All", *sorted(cases["setting"].unique())],
+            key="accident_setting",
+        )
+
+    selected_psi = st.selectbox(
+        "Related PSI evidence",
+        ["All", "BASS-II", "SAME", "No direct PSI match"],
+        key="accident_psi",
+    )
+
+    filtered = cases.copy()
+
+    if search:
+        searchable_columns = [
+            "title",
+            "event_type",
+            "initiating_event",
+            "contributing_factors",
+            "operational_consequences",
+            "response_actions",
+            "research_focus",
+        ]
+        searchable = (
+            filtered[searchable_columns]
+            .astype(str)
+            .agg(" ".join, axis=1)
+        )
+        filtered = filtered[
+            searchable.str.contains(search, case=False, regex=False)
+        ]
+
+    if selected_focus != "All":
+        filtered = filtered[
+            filtered["research_focus"].apply(
+                lambda value: selected_focus in split_pipe_values(value)
+            )
+        ]
+
+    if selected_setting != "All":
+        filtered = filtered[filtered["setting"] == selected_setting]
+
+    if selected_psi == "No direct PSI match":
+        filtered = filtered[filtered["related_psi"].str.strip() == ""]
+    elif selected_psi != "All":
+        filtered = filtered[filtered["related_psi"] == selected_psi]
+
+    st.markdown(
+        f'<div class="case-count">{len(filtered)} relevant case' +
+        ('</div>' if len(filtered) == 1 else 's</div>'),
+        unsafe_allow_html=True,
+    )
+
+    if filtered.empty:
+        st.info("No documented cases match the selected context.")
+        return
+
+    case_ids = filtered["case_id"].tolist()
+    labels = {
+        row["case_id"]: f"{row['title']} · {row['event_date']}"
+        for _, row in filtered.iterrows()
+    }
+    if st.session_state.get("selected_accident_case") not in case_ids:
+        st.session_state["selected_accident_case"] = case_ids[0]
+    selected_case = st.selectbox(
+        "Select a case for detailed review",
+        case_ids,
+        format_func=lambda case_id: labels[case_id],
+        key="selected_accident_case",
+    )
+
+    selected_row = filtered[filtered["case_id"] == selected_case].iloc[0]
+    st.markdown(
+        f'<div class="em">{accident_case_card(selected_row)}</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        '<div class="footer">Historical cases support context and research questions. They are not experimental observations, accident-frequency data, or prediction labels.</div>',
+        unsafe_allow_html=True,
+    )
+
+
 st.markdown(CSS, unsafe_allow_html=True)
 
 page = get_query_value("page", "home")
@@ -1426,5 +1747,7 @@ if page == "library":
     render_library()
 elif page == "explorer":
     render_experiment_explorer()
+elif page == "accidents":
+    render_accident_cases()
 else:
     render_home()
