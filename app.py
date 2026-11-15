@@ -318,7 +318,7 @@ hero = html(f"""
   <div>
     <div class="eyebrow">NASA PSI EXPERIMENTAL DATA</div>
     <h1>Find the experiment behind the question.</h1>
-    <p class="lead">Ember organizes experimental conditions and documented outcomes so research students can locate relevant evidence without searching through disconnected reports.</p>
+    <p class="lead">Ember is an AI-powered scientific evidence navigator that transforms NASA’s overwhelming volume of scattered microgravity combustion research into an interactive tool. We help researchers and students navigate material properties, oxygen levels, and ventilation conditions to answer a crucial question: What NASA evidence supports the safety of our experiment in a spacecraft cabin? By organizing experimental conditions and documented outcomes from the PSI (Physical Science Informatics) database, Ember eliminates the need to search through disconnected reports, empowering teams to evaluate fire safety risks in closed space habitats with confidence.</p>
     <div class="cta-row">
       <a class="btn" href="#about">Understand Ember</a>
       <span class="scope-note">Prototype scope: BASS-II / SIBAL and SAME</span>
