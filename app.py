@@ -3,129 +3,227 @@ from pathlib import Path
 
 import streamlit as st
 
-st.set_page_config(page_title="EMBER", page_icon="🔥", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(
+    page_title="Ember",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
 
-ASSETS = Path(__file__).parent / "assets"
+BASE_DIR = Path(__file__).parent
+GIF_CANDIDATES = ["ember.gif.gif", "ember.gif", "ember_gif.gif"]
 
-# ---------- Paleta ----------
-BG = "#0B0B0C"        # fondo
-SURFACE = "#17120F"   # tarjetas
-EMBER = "#E35D0B"     # naranja principal
-EMBER_SOFT = "#7A3512"
-TEXT = "#F5F1EC"
-MUTED = "#8C847C"
-
-
-@st.cache_data
-def gif_b64(name: str) -> str:
-    return base64.b64encode((ASSETS / name).read_bytes()).decode()
-
-
-def inject_css() -> None:
-    st.markdown(
-        f"""
+CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+:root {
+  --bg: #090909; --bg-soft: #111111; --card: #1A1A1A;
+  --ember: #F25C05; --ember-light: #FF7A1A;
+  --text: #F4F4F2; --muted: #9A9A9A; --border: rgba(255,255,255,0.08);
+}
+header[data-testid="stHeader"], footer, #MainMenu, [data-testid="stToolbar"],
+[data-testid="stDecoration"], [data-testid="stSidebar"],
+[data-testid="stSidebarCollapsedControl"], [data-testid="collapsedControl"] { display: none !important; }
+html, body, .stApp { background: var(--bg) !important; }
+.stApp {
+  background:
+    radial-gradient(700px 420px at 85% 6%, rgba(242,92,5,0.13), transparent 70%),
+    var(--bg) !important;
+}
+.block-container { max-width: 1180px !important; padding: 2rem 1.5rem 3rem !important; }
+.em, .em * { box-sizing: border-box; font-family: Inter, Arial, sans-serif; }
+.em { color: var(--text); line-height: 1.6; }
+.em a { text-decoration: none; }
+.em h1, .em h2, .em h3, .em p { margin: 0; }
 
-html, body, [class*="css"], .stApp {{ font-family: 'Outfit', sans-serif; }}
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 24px;
+  padding: 18px 0 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.brand { font-weight: 800; letter-spacing: 0.22em; font-size: 1.05rem; color: var(--text); }
+.nav-links { display: flex; gap: 28px; flex-wrap: wrap; align-items: center; }
+.nav-item { font-size: 0.92rem; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+.nav-item.active { color: var(--ember); font-weight: 600; border-bottom: 2px solid var(--ember); padding-bottom: 2px; }
+.nav-item small { font-size: 0.68rem; color: #6d6d6d; border: 1px solid var(--border);
+  border-radius: 999px; padding: 1px 8px; }
 
-/* Quitar el chrome de Streamlit */
-#MainMenu, footer, header, [data-testid="stToolbar"], [data-testid="stDecoration"] {{ display: none !important; }}
+.hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center;
+  min-height: 78vh; padding: 56px 0; }
+.eyebrow { color: var(--ember-light); font-size: 0.78rem; letter-spacing: 0.18em; font-weight: 600; margin-bottom: 22px; }
+.hero h1 { font-size: clamp(2.4rem, 5.2vw, 4.2rem); line-height: 1.05; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 26px; }
+.hero p.lead { color: var(--muted); font-size: 1.1rem; max-width: 34em; margin-bottom: 36px; }
+.cta-row { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.btn { background: var(--ember); color: #0b0b0b !important; font-weight: 700; padding: 14px 28px;
+  border-radius: 999px; display: inline-block; box-shadow: 0 8px 30px rgba(242,92,5,0.28); }
+.btn:hover { background: var(--ember-light); }
+.btn:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+.scope-note { color: var(--muted); font-size: 0.88rem; }
 
-.stApp {{
-    background:
-        radial-gradient(900px 420px at 12% -8%, rgba(227,93,11,.28), transparent 60%),
-        radial-gradient(700px 500px at 92% 110%, rgba(227,93,11,.10), transparent 60%),
-        {BG};
-}}
-.block-container {{ max-width: 1180px; padding: 2.2rem 2rem 3rem; }}
+.visual { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 14px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 90px rgba(242,92,5,0.16); }
+.visual img { width: 100%; height: auto; display: block; border-radius: 14px; }
+.visual-empty { aspect-ratio: 16 / 9; border-radius: 14px; display: flex; align-items: center;
+  justify-content: center; color: var(--muted); font-size: 0.85rem; text-align: center; padding: 20px;
+  background: radial-gradient(circle at 60% 45%, rgba(242,92,5,0.14), #0d0d0d 65%); }
 
-/* Marca */
-.brand {{ display:flex; align-items:center; gap:.7rem; font-weight:600; letter-spacing:.32em; font-size:1.05rem; color:{TEXT}; }}
-.brand i {{ display:inline-flex; gap:3px; align-items:flex-end; height:20px; }}
-.brand i b {{ width:3px; background:{MUTED}; border-radius:2px; display:block; }}
-.brand i b:nth-child(1) {{ height:12px; }} .brand i b:nth-child(2) {{ height:20px; }} .brand i b:nth-child(3) {{ height:15px; }}
+.section { padding: 72px 0 8px; }
+.section h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 20px; }
+.about { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 24px;
+  padding: 48px; margin-top: 40px; scroll-margin-top: 24px; }
+.about p { color: #cfcfcc; font-size: 1.05rem; max-width: 52em; }
 
-/* Hero */
-.hero-title {{ font-size: clamp(2.8rem, 6vw, 4.6rem); font-weight:600; line-height:1.04; letter-spacing:-.02em; color:{TEXT}; margin: 0 0 1.2rem; }}
-.hero-sub {{ color:{EMBER}; font-size:1.1rem; font-weight:400; max-width:26ch; line-height:1.45; margin-bottom: 2.4rem; }}
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+.card.accent { border-top: 2px solid var(--ember); }
+.card h3 { font-size: 1.15rem; font-weight: 650; margin-bottom: 12px; line-height: 1.3; }
+.card p { color: var(--muted); font-size: 0.96rem; }
+.step-n { color: var(--ember-light); font-weight: 700; font-size: 0.95rem; margin-bottom: 14px; }
+.step-t { font-size: 1.1rem; font-weight: 650; margin-bottom: 10px; }
 
-.orb-wrap {{
-    position:relative; width:min(100%, 520px); aspect-ratio:1/1; margin-inline:auto;
-    border-radius:50%;
-    -webkit-mask-image: radial-gradient(circle at center, #000 52%, transparent 71%);
-            mask-image: radial-gradient(circle at center, #000 52%, transparent 71%);
-}}
-.orb-wrap img {{ width:100%; height:100%; object-fit:cover; mix-blend-mode:screen; transform:scale(1.55); }}
+.plan { padding: 24px; }
+.plan h3 { font-size: 1.02rem; margin-bottom: 8px; }
+.status { display: inline-block; font-size: 0.72rem; padding: 3px 12px; border-radius: 999px; margin-bottom: 14px;
+  border: 1px solid var(--border); color: var(--muted); }
+.status.on { color: var(--ember-light); border-color: rgba(242,92,5,0.5); background: rgba(242,92,5,0.1); }
+.plan.off { opacity: 0.8; }
 
-/* Botón principal: círculo naranja como en el mockup */
-div.stButton > button {{
-    background:{EMBER}; color:#fff; border:none; border-radius:999px;
-    padding:1.05rem 2.2rem; font-family:'Outfit',sans-serif; font-weight:500; font-size:1.05rem;
-    box-shadow: 0 10px 34px rgba(227,93,11,.38);
-    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-}}
-div.stButton > button:hover {{ background:#F26A14; color:#fff; transform:translateY(-2px); box-shadow:0 14px 40px rgba(227,93,11,.5); }}
-div.stButton > button:focus-visible {{ outline:2px solid {TEXT}; outline-offset:3px; }}
-div.stButton > button:active {{ transform:translateY(0); }}
+.scope { margin-top: 72px; background: linear-gradient(135deg, rgba(242,92,5,0.10), rgba(26,26,26,1) 55%);
+  border: 1px solid rgba(242,92,5,0.28); border-radius: 22px; padding: 40px; }
+.scope h2 { font-size: 1.3rem; margin-bottom: 12px; }
+.scope p { color: #cfcfcc; max-width: 52em; }
 
-/* Tarjetas del panel */
-.greet {{ font-size:2rem; font-weight:600; margin:2rem 0 .2rem; }}
-.greet-sub {{ color:{MUTED}; margin-bottom:1.6rem; }}
-.stat {{
-    background: linear-gradient(150deg, rgba(227,93,11,.22), rgba(255,255,255,.03) 55%), {SURFACE};
-    border:1px solid rgba(255,255,255,.06); border-radius:22px; padding:1.6rem 1rem; text-align:center;
-}}
-.stat .n {{ font-size:2.4rem; font-weight:600; }}
-.stat .l {{ color:{MUTED}; font-size:.9rem; }}
+.footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--border);
+  color: var(--muted); font-size: 0.88rem; text-align: center; }
 
-@media (prefers-reduced-motion: reduce) {{ div.stButton > button {{ transition:none; }} }}
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 36px; min-height: auto; padding: 36px 0; }
+  .grid3, .grid4 { grid-template-columns: 1fr; }
+  .about, .scope { padding: 28px; }
+  .nav-links { gap: 16px 20px; }
+}
+@media (min-width: 901px) and (max-width: 1100px) {
+  .grid4 { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
-""",
-        unsafe_allow_html=True,
-    )
+"""
 
 
-def landing() -> None:
-    st.markdown(
-        '<div class="brand"><i><b></b><b></b><b></b></i>EMBER</div>', unsafe_allow_html=True
-    )
-    st.write("")
-    left, right = st.columns([1, 1], gap="large", vertical_alignment="center")
-
-    with left:
-        st.markdown(
-            """
-<h1 class="hero-title">Manage your<br>daily tasks</h1>
-<p class="hero-sub">Team and Project management with solution providing App</p>
-""",
-            unsafe_allow_html=True,
-        )
-        if st.button("Get Started", key="start"):
-            st.session_state.page = "home"
-            st.rerun()
-
-    with right:
-        st.markdown(
-            f'<div class="orb-wrap"><img alt="Esfera de brasas" src="data:image/gif;base64,{gif_b64("ember.gif")}"></div>',
-            unsafe_allow_html=True,
-        )
+def load_gif_html() -> str:
+    for name in GIF_CANDIDATES:
+        path = BASE_DIR / name
+        if path.is_file():
+            data = base64.b64encode(path.read_bytes()).decode()
+            return f'<img src="data:image/gif;base64,{data}" alt="Animated visual of a sample burning">'
+    return '<div class="visual-empty">Visual not found. Place ember.gif.gif next to app.py.</div>'
 
 
-def home() -> None:
-    top = st.columns([6, 1])
-    top[0].markdown('<div class="brand"><i><b></b><b></b><b></b></i>EMBER</div>', unsafe_allow_html=True)
-    if top[1].button("Back", key="back"):
-        st.session_state.page = "landing"
-        st.rerun()
-
-    st.markdown('<div class="greet">Hi Ghulam</div><div class="greet-sub">6 tasks are pending</div>', unsafe_allow_html=True)
-    st.markdown("### Monthly Review")
-    cols = st.columns(4)
-    for col, (n, label) in zip(cols, [(22, "Done"), (7, "In progress"), (10, "Ongoing"), (12, "Waiting for review")]):
-        col.markdown(f'<div class="stat"><div class="n">{n}</div><div class="l">{label}</div></div>', unsafe_allow_html=True)
+def html(block: str) -> str:
+    return "\n".join(line.strip() for line in block.splitlines() if line.strip())
 
 
-inject_css()
-st.session_state.setdefault("page", "landing")
-{"landing": landing, "home": home}[st.session_state.page]()
+nav = html("""
+<div class="nav">
+  <span class="brand">EMBER</span>
+  <div class="nav-links">
+    <span class="nav-item active">Home</span>
+    <span class="nav-item">Experiment Explorer <small>Planned</small></span>
+    <span class="nav-item">Accident Cases <small>Planned</small></span>
+    <span class="nav-item">Data Lab <small>Planned</small></span>
+  </div>
+</div>
+""")
+
+hero = f"""
+<div class="hero">
+  <div>
+    <div class="eyebrow">NASA PSI EXPERIMENTAL DATA</div>
+    <h1>Find the experiment behind the question.</h1>
+    <p class="lead">Ember organizes experimental conditions and documented outcomes so research students can locate relevant evidence without searching through disconnected reports.</p>
+    <div class="cta-row">
+      <a class="btn" href="#about">Understand Ember</a>
+      <span class="scope-note">Prototype scope: BASS-II / SIBAL</span>
+    </div>
+  </div>
+  <div class="visual">{load_gif_html()}</div>
+</div>
+"""
+
+body = html("""
+<div class="about" id="about">
+  <h2>From scattered reports to usable evidence</h2>
+  <p>Ember organizes experimental information from NASA’s Physical Sciences Informatics platform for research students. The prototype begins with BASS-II/SIBAL and connects variables such as material, oxygen concentration, airflow, sample geometry, sample reuse, ignition status, and documented outcome. Its purpose is to make relevant experiments easier to find and compare while keeping the original source, missing information, and limits of interpretation visible.</p>
+</div>
+
+<div class="section">
+  <div class="grid3">
+    <div class="card accent">
+      <h3>Search by experimental conditions</h3>
+      <p>Locate experiments using variables such as material, oxygen concentration, airflow, geometry, ignition status, and documented outcome.</p>
+    </div>
+    <div class="card accent">
+      <h3>Compare documented results</h3>
+      <p>Review how different experimental conditions and observed outcomes are represented in the available records without converting descriptive evidence into unsupported predictions.</p>
+    </div>
+    <div class="card accent">
+      <h3>Keep the source visible</h3>
+      <p>Preserve the connection between every result, its original report, missing fields, and the limitations that affect its interpretation.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>How Ember works</h2>
+  <div class="grid3">
+    <div class="card">
+      <div class="step-n">01</div>
+      <div class="step-t">Define the conditions</div>
+      <p>Select the variables that are relevant to the research question.</p>
+    </div>
+    <div class="card">
+      <div class="step-n">02</div>
+      <div class="step-t">Review matching experiments</div>
+      <p>Examine the documented conditions, observations, and available outcomes.</p>
+    </div>
+    <div class="card">
+      <div class="step-n">03</div>
+      <div class="step-t">Verify the evidence</div>
+      <p>Consult the source and consider missing information before drawing conclusions.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Planned platform structure</h2>
+  <div class="grid4">
+    <div class="card plan">
+      <span class="status on">Available</span>
+      <h3>Home</h3>
+      <p>Project purpose and scope.</p>
+    </div>
+    <div class="card plan off">
+      <span class="status">Planned</span>
+      <h3>Experiment Explorer</h3>
+      <p>Search and filter PSI experiments.</p>
+    </div>
+    <div class="card plan off">
+      <span class="status">Planned</span>
+      <h3>Accident Cases</h3>
+      <p>Review documented cases and their relevant variables.</p>
+    </div>
+    <div class="card plan off">
+      <span class="status">Planned</span>
+      <h3>Data Lab</h3>
+      <p>Explore selected records through tables and descriptive visualizations.</p>
+    </div>
+  </div>
+</div>
+
+<div class="scope">
+  <h2>Prototype scope</h2>
+  <p>The current prototype uses the available BASS-II/SIBAL records to demonstrate how PSI information can be organized and explored. It does not estimate fire risk, replace the original scientific reports, or generalize results to experimental conditions that were not tested.</p>
+</div>
+
+<div class="footer">Ember — Experimental evidence organized for research.</div>
+""")
+
+st.markdown(CSS, unsafe_allow_html=True)
+st.markdown(f'<div class="em">{nav}{hero}{body}</div>', unsafe_allow_html=True)
