@@ -659,7 +659,7 @@ def match_evidence(
         }
 
     outside = outside_numeric_conditions(dataframe, query)
-    ranked = rank_evidence_records(dataframe, query).head(3)
+    ranked = rank_evidence_records(dataframe, query).head(1)
     return {
         "status": "outside" if outside else "partial",
         "records": ranked,
@@ -1086,23 +1086,23 @@ def render_flame_results(
     elif status == "partial":
         status_label = "Partial record evidence"
         status_class = "partial"
-        found = "3 nearest documented records"
+        found = "1 closest documented record"
         explanation = (
             "The selected values fall within the general range represented "
             "by the prototype, but no single record combines every condition. "
-            "The records below are ordered by condition similarity and each "
-            "difference is shown explicitly."
+            "The closest record is shown below and each difference is "
+            "identified explicitly."
         )
         shown_records = records
     else:
         status_label = "Outside current coverage"
         status_class = "outside"
-        found = "3 closest records for reference"
+        found = "1 closest record for reference"
         outside_text = "; ".join(result["outside"])
         explanation = (
             "No structured record in this prototype supports all selected "
             f"conditions. Outside coverage: {outside_text}. The closest "
-            "records are shown only to identify the current evidence boundary, "
+            "record is shown only to identify the current evidence boundary, "
             "not to extrapolate an outcome."
         )
         shown_records = records
