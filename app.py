@@ -403,7 +403,7 @@ body = html(
       </div>
     </div>
 
-   
+    <div class="footer">Ember — Experimental evidence organized for research.</div>
     """
 )
 
