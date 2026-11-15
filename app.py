@@ -58,6 +58,9 @@ html, body, .stApp { background: var(--bg) !important; }
 .nav-links { display: flex; gap: 28px; flex-wrap: wrap; align-items: center; }
 .nav-item { font-size: 0.92rem; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
 a.nav-item:hover { color: var(--text); }
+.em a.nav-item { color: var(--muted) !important; }
+.em a.nav-item:hover { color: var(--text) !important; }
+.em a.nav-item.active { color: var(--ember) !important; }
 .nav-item.active { color: var(--ember); font-weight: 600; border-bottom: 2px solid var(--ember); padding-bottom: 2px; }
 .nav-item small { font-size: 0.68rem; color: #6d6d6d; border: 1px solid var(--border);
   border-radius: 999px; padding: 1px 8px; }
@@ -227,6 +230,18 @@ div[data-testid="stButton"] button { background: var(--ember); color: #0b0b0b; b
   border-radius: 999px; font-weight: 700; padding-left: 24px; padding-right: 24px; }
 div[data-testid="stButton"] button:hover { background: var(--ember-light); color: #0b0b0b; border: 0; }
 
+.stat-hint { color: var(--muted); font-size: 0.74rem; margin-top: 6px; line-height: 1.4; }
+.documentary-panel h3, .result-explanation h3 { color: var(--text); font-size: 1rem; margin-bottom: 8px; }
+.documentary-panel { margin-bottom: 18px; }
+div[data-baseweb="tab-list"] { gap: 6px; border-bottom: 1px solid var(--border); }
+button[data-baseweb="tab"] p { color: var(--muted) !important; font-weight: 600; }
+button[data-baseweb="tab"][aria-selected="true"] p { color: var(--ember-light) !important; }
+div[data-baseweb="tab-highlight"] { background-color: var(--ember) !important; }
+div[data-testid="stDownloadButton"] button { background: transparent; color: var(--ember-light);
+  border: 1px solid rgba(242,92,5,0.5); border-radius: 999px; font-weight: 600; }
+div[data-testid="stDownloadButton"] button:hover { background: rgba(242,92,5,0.12); color: var(--text);
+  border-color: var(--ember); }
+
 .footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--border);
   color: var(--muted); font-size: 0.88rem; text-align: center; }
 
@@ -274,6 +289,7 @@ def render_nav(active_page: str) -> str:
     library_class = "nav-item active" if active_page == "library" else "nav-item"
     explorer_class = "nav-item active" if active_page == "explorer" else "nav-item"
     accidents_class = "nav-item active" if active_page == "accidents" else "nav-item"
+    datalab_class = "nav-item active" if active_page == "datalab" else "nav-item"
 
     return html(
         f"""
@@ -284,7 +300,7 @@ def render_nav(active_page: str) -> str:
             <a class="{library_class}" href="?page=library" target="_self">Library</a>
             <a class="{explorer_class}" href="?page=explorer" target="_self">Experiment Explorer</a>
             <a class="{accidents_class}" href="?page=accidents" target="_self">Accident Cases</a>
-            <span class="nav-item">Data Lab <small>Planned</small></span>
+            <a class="{datalab_class}" href="?page=datalab" target="_self">Data Lab</a>
           </div>
         </div>
         """
@@ -374,8 +390,8 @@ body = html(
           <h3>Accident Cases</h3>
           <p>Review documented incidents, operational factors, and evidence limits.</p>
         </div>
-        <div class="card plan off">
-          <span class="status">Planned</span>
+        <div class="card plan">
+          <span class="status on">Available</span>
           <h3>Data Lab</h3>
           <p>Explore selected records through tables and descriptive visualizations.</p>
         </div>
@@ -1740,6 +1756,598 @@ def render_accident_cases() -> None:
     )
 
 
+# ---------------------------------------------------------------------------
+# Data Lab
+# ---------------------------------------------------------------------------
+
+DL_COLORS = {
+    "Flame extinction by quenching": "#F25C05",
+    "No ignition": "#78C8C3",
+    "Blowoff": "#E7B55A",
+    "No blowoff": "#B58BE0",
+    "Outcome not specified": "#8A8A88",
+    "Reused sample: ignition": "#FF9A52",
+    "Reused sample: no ignition": "#4FA39E",
+    "Reused sample: one-sided flame": "#D89595",
+}
+DL_TEXT = "#CFCFCC"
+DL_GRID = "rgba(255,255,255,0.07)"
+
+# Observed ranges of the SIBAL subset (Dominio sheet). Used only to draw the
+# envelope; they are recomputed from the data below, never typed by hand.
+OUTCOME_ORDER = list(DL_COLORS.keys())
+
+
+@st.cache_data(show_spinner=False)
+def load_same_sizes() -> pd.DataFrame:
+    path = DATA_DIR / "same_particle_sizes.csv"
+    if not path.is_file():
+        raise FileNotFoundError(f"Missing file: {path}.")
+    frame = pd.read_csv(path)
+    frame["change_nm"] = frame["aged_720s_nm"] - frame["base_nm"]
+    frame["change_pct"] = frame["change_nm"] / frame["base_nm"] * 100
+    return frame
+
+
+@st.cache_data(show_spinner=False)
+def load_saffire() -> pd.DataFrame:
+    path = DATA_DIR / "saffire_tests.csv"
+    if not path.is_file():
+        raise FileNotFoundError(f"Missing file: {path}.")
+    frame = pd.read_csv(path)
+    for column in ["sample_width_cm", "sample_length_cm", "thickness_mm",
+                   "flow_cm_s", "oxygen_vol_pct", "duration_s", "spread_rate_mm_s"]:
+        frame[column] = pd.to_numeric(frame[column], errors="coerce")
+    return frame
+
+
+def dl_style(chart):
+    import altair as alt  # bundled with Streamlit
+
+    return (
+        chart.configure(background="transparent")
+        .configure_view(stroke=None)
+        .configure_axis(
+            labelColor=DL_TEXT, titleColor=DL_TEXT, gridColor=DL_GRID,
+            domainColor="rgba(255,255,255,0.2)", tickColor="rgba(255,255,255,0.2)",
+            labelFontSize=12, titleFontSize=12, titleFontWeight=600,
+        )
+        .configure_legend(
+            labelColor=DL_TEXT, titleColor=DL_TEXT, labelFontSize=11,
+            titleFontSize=11, orient="bottom", columns=2, symbolType="circle",
+        )
+        .configure_title(color="#F4F4F2", fontSize=14, anchor="start")
+    )
+
+
+def dl_header(title: str, text: str, chips: list[str]) -> str:
+    strip = "".join(f'<span class="dataset-stat">{escape(c)}</span>' for c in chips)
+    return f"""
+    <div class="explorer-header">
+      <div class="eyebrow">DESCRIPTIVE DATA EXPLORATION</div>
+      <h1>{escape(title)}</h1>
+      <p>{escape(text)}</p>
+      <div class="dataset-strip">{strip}</div>
+    </div>
+    """
+
+
+def dl_note(title: str, text: str, tone: str = "") -> str:
+    cls = "result-explanation" if not tone else f"documentary-panel"
+    return f'<div class="{cls}"><h3>{escape(title)}</h3><p>{escape(text)}</p></div>'
+
+
+def dl_stat(label: str, value: str, hint: str = "") -> str:
+    hint_html = f'<div class="stat-hint">{escape(hint)}</div>' if hint else ""
+    return (
+        '<div class="summary-item">'
+        f'<div class="summary-label">{escape(label)}</div>'
+        f'<div class="summary-value">{escape(value)}</div>{hint_html}</div>'
+    )
+
+
+def spread_offsets(frame: pd.DataFrame) -> pd.Series:
+    """Tiny visual offset (<= 0.1 vol. %) for tests that share exact coordinates."""
+    key = (
+        frame["oxygen_vol_pct"].astype(str) + "|"
+        + frame["airflow_start_cm_s"].astype(str) + "|"
+        + frame["airflow_end_cm_s"].astype(str)
+    )
+    rank = frame.groupby(key).cumcount()
+    size = key.map(key.value_counts())
+    return ((rank - (size - 1) / 2) * 0.07).where(size > 1, 0.0)
+
+
+def bassii_chart(frame: pd.DataFrame, scenario: dict | None, envelope: dict):
+    import altair as alt
+
+    plot = frame.copy()
+    plot["o2_plot"] = plot["oxygen_vol_pct"] + spread_offsets(plot)
+    plot["airflow_pair"] = (
+        plot["airflow_start_cm_s"].map(lambda v: f"{v:g}")
+        + " → " + plot["airflow_end_cm_s"].map(lambda v: f"{v:g}") + " cm/s"
+    )
+    plot["sample"] = plot["reused_sample"].map({"Yes": "Reused sample", "No": "New sample"})
+    plot["quality"] = plot["oxygen_caveat"].map(
+        {"Yes": "NASA flags this O₂ reading as possibly inaccurate", "No": "No flag"}
+    )
+    plot["width_label"] = plot["sample_width_cm"].map(lambda v: f"{v:g} cm")
+
+    scale = alt.Scale(domain=OUTCOME_ORDER, range=[DL_COLORS[k] for k in OUTCOME_ORDER])
+    x_enc = alt.X(
+        "o2_plot:Q", title="Oxygen concentration (vol. %)", axis=alt.Axis(values=list(range(15, 23)), format="d"),
+        scale=alt.Scale(domain=[envelope["o2_lo"] - 1.2, envelope["o2_hi"] + 1.2], nice=False, zero=False),
+    )
+    y_scale = alt.Scale(type="sqrt", domain=[0, envelope["flow_hi"] * 1.12])
+    tooltip = [
+        alt.Tooltip("test_id:N", title="Test"),
+        alt.Tooltip("observed_outcome:N", title="Documented outcome"),
+        alt.Tooltip("oxygen_vol_pct:Q", title="O₂ (vol. %)"),
+        alt.Tooltip("airflow_pair:N", title="Airflow start → end"),
+        alt.Tooltip("airflow_profile:N", title="Profile"),
+        alt.Tooltip("width_label:N", title="Sample width"),
+        alt.Tooltip("sample:N", title="Sample condition"),
+        alt.Tooltip("quality:N", title="Data quality"),
+        alt.Tooltip("source_table:N", title="Source table"),
+        alt.Tooltip("source_page:Q", title="Report page"),
+    ]
+
+    envelope_df = pd.DataFrame([{
+        "x0": envelope["o2_lo"], "x1": envelope["o2_hi"],
+        "y0": envelope["flow_lo"], "y1": envelope["flow_hi"],
+    }])
+    box = alt.Chart(envelope_df).mark_rect(
+        color="#F25C05", opacity=0.05, stroke="#F25C05", strokeOpacity=0.35,
+        strokeDash=[5, 4],
+    ).encode(
+        x=alt.X("x0:Q", scale=alt.Scale(domain=[envelope["o2_lo"] - 1.2, envelope["o2_hi"] + 1.2], nice=False, zero=False)),
+        x2="x1:Q", y=alt.Y("y0:Q", scale=y_scale), y2="y1:Q",
+    )
+
+    segment = alt.Chart(plot).mark_rule(strokeWidth=2, opacity=0.55).encode(
+        x=x_enc,
+        y=alt.Y("airflow_start_cm_s:Q", scale=y_scale, title="Airflow (cm/s, √ scale)"),
+        y2="airflow_end_cm_s:Q",
+        color=alt.Color("observed_outcome:N", scale=scale, legend=None),
+        strokeDash=alt.condition(alt.datum.reused_sample == "Yes", alt.value([4, 3]), alt.value([1, 0])),
+        tooltip=tooltip,
+    )
+    start = alt.Chart(plot).mark_point(filled=True, size=95, opacity=0.95, stroke="#090909", strokeWidth=1).encode(
+        x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale),
+        color=alt.Color("observed_outcome:N", scale=scale, title="Documented outcome",
+                        legend=alt.Legend(orient="bottom", columns=3, symbolType="circle")),
+        shape=alt.Shape("reused_sample:N", scale=alt.Scale(domain=["No", "Yes"], range=["circle", "square"]),
+                        legend=None),
+        tooltip=tooltip,
+    )
+    end = alt.Chart(plot[plot["airflow_start_cm_s"] != plot["airflow_end_cm_s"]]).mark_point(
+        shape="diamond", size=70, filled=False, strokeWidth=2,
+    ).encode(
+        x=x_enc, y=alt.Y("airflow_end_cm_s:Q", scale=y_scale),
+        color=alt.Color("observed_outcome:N", scale=scale, legend=None),
+        tooltip=tooltip,
+    )
+    flagged = alt.Chart(plot[plot["oxygen_caveat"] == "Yes"]).mark_point(
+        shape="circle", size=330, filled=False, stroke="#F4F4F2", strokeWidth=1.2, strokeDash=[2, 2],
+    ).encode(x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale), tooltip=tooltip)
+
+    layers = [box, segment, start, end, flagged]
+    if scenario:
+        sc = pd.DataFrame([{"o2": scenario["oxygen_vol_pct"], "flow": scenario["airflow_start_cm_s"],
+                            "label": "Your scenario"}])
+        layers.append(
+            alt.Chart(sc).mark_point(shape="cross", size=260, strokeWidth=3, color="#FFFFFF").encode(
+                x="o2:Q", y=alt.Y("flow:Q", scale=y_scale),
+                tooltip=[alt.Tooltip("label:N", title=""), alt.Tooltip("o2:Q", title="O₂ (vol. %)"),
+                         alt.Tooltip("flow:Q", title="Airflow (cm/s)")],
+            )
+        )
+    return dl_style(alt.layer(*layers).properties(height=430))
+
+
+def render_bassii_tab(tests: pd.DataFrame) -> None:
+    envelope = {
+        "o2_lo": float(tests["oxygen_vol_pct"].min()), "o2_hi": float(tests["oxygen_vol_pct"].max()),
+        "flow_lo": float(min(tests["airflow_start_cm_s"].min(), tests["airflow_end_cm_s"].min())),
+        "flow_hi": float(max(tests["airflow_start_cm_s"].max(), tests["airflow_end_cm_s"].max())),
+    }
+
+    st.markdown(
+        '<div class="em">'
+        + dl_note(
+            "What this chart shows",
+            "Each mark is one real test from Table 7.1 of the BASS-II summary report. Circles are new samples and "
+            "squares are reused samples. When airflow changed during a run, a line joins the starting airflow "
+            "(filled mark) to the final airflow (open diamond), because one number cannot describe that test. "
+            "Colour is the outcome written in the table.",
+        )
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+    c1, c2, c3 = st.columns([1, 1, 2])
+    with c1:
+        widths = st.multiselect(
+            "Sample width (cm)", sorted(tests["sample_width_cm"].dropna().unique()),
+            default=sorted(tests["sample_width_cm"].dropna().unique()), key="dl_width",
+        )
+    with c2:
+        sample_state = st.selectbox("Sample condition", ["All", "New samples only", "Reused samples only"],
+                                    key="dl_sample")
+    with c3:
+        outcomes = st.multiselect(
+            "Documented outcome", OUTCOME_ORDER, default=OUTCOME_ORDER, key="dl_outcomes",
+        )
+
+    filtered = tests[tests["sample_width_cm"].isin(widths) & tests["observed_outcome"].isin(outcomes)]
+    if sample_state == "New samples only":
+        filtered = filtered[filtered["reused_sample"] == "No"]
+    elif sample_state == "Reused samples only":
+        filtered = filtered[filtered["reused_sample"] == "Yes"]
+
+    overlay = st.checkbox("Overlay my scenario on the chart", value=False, key="dl_overlay")
+    scenario = None
+    if overlay:
+        s1, s2 = st.columns(2)
+        with s1:
+            o2 = st.number_input("Scenario oxygen (vol. %)", min_value=0.0, max_value=100.0,
+                                 value=18.7, step=0.1, key="dl_s_o2")
+        with s2:
+            flow = st.number_input("Scenario initial airflow (cm/s)", min_value=0.0, max_value=500.0,
+                                   value=10.0, step=0.5, key="dl_s_flow")
+        scenario = {"oxygen_vol_pct": float(o2), "airflow_start_cm_s": float(flow)}
+        outside = outside_numeric_conditions(
+            tests, {"oxygen_vol_pct": o2, "airflow_start_cm_s": flow}
+        )
+        if outside:
+            st.warning(
+                "Outside the tested domain: " + "; ".join(outside)
+                + ". Ember does not extrapolate beyond the observed range."
+            )
+        else:
+            near = tests[
+                (tests["oxygen_vol_pct"].sub(o2).abs() <= 0.5)
+                & (tests["airflow_start_cm_s"].sub(flow).abs() <= 1.0)
+            ]
+            st.info(
+                f"Inside the observed ranges, with {len(near)} test(s) within ±0.5 vol. % O₂ and ±1 cm/s "
+                "initial airflow. Being inside both ranges does not mean this exact combination was tested."
+            )
+
+    if filtered.empty:
+        st.info("No tests match the selected filters.")
+        return
+
+    st.altair_chart(bassii_chart(filtered, scenario, envelope), width="stretch", theme=None)
+    st.caption(
+        f"{len(filtered)} of {len(tests)} tests shown. Shaded rectangle = observed O₂ and airflow ranges; "
+        "a point inside it is not evidence that the combination was tested. Dotted white ring = NASA flags the "
+        "O₂ reading as possibly inaccurate (GMT45-T1, GMT45-T2). Tests with identical coordinates are offset "
+        "by at most 0.1 vol. % so they remain visible; tooltips show the true values. Airflow axis uses a "
+        "square-root scale to separate low velocities. Colours are the same as in the outcome bars below."
+    )
+
+    left, right = st.columns([1, 1])
+    counts = (
+        filtered["observed_outcome"].value_counts().rename_axis("outcome").reset_index(name="tests")
+    )
+    with left:
+        import altair as alt
+
+        bars = alt.Chart(counts).mark_bar(cornerRadiusEnd=4).encode(
+            y=alt.Y("outcome:N", sort="-x", title=None, axis=alt.Axis(labelLimit=240)),
+            x=alt.X("tests:Q", title="Number of tests", axis=alt.Axis(tickMinStep=1, format="d")),
+            color=alt.Color("outcome:N", scale=alt.Scale(domain=OUTCOME_ORDER,
+                            range=[DL_COLORS[k] for k in OUTCOME_ORDER]), legend=None),
+            tooltip=["outcome:N", "tests:Q"],
+        ).properties(height=260, title="Documented outcomes (counts, not probabilities)")
+        st.altair_chart(dl_style(bars), width="stretch", theme=None)
+    with right:
+        new = tests[tests["reused_sample"] == "No"]
+        quench = int((new["observed_outcome"] == "Flame extinction by quenching").sum())
+        st.markdown(
+            '<div class="em">'
+            + dl_stat("Quenching among new samples", f"{quench} of {len(new)} tests ({quench / len(new):.1%})",
+                      "Descriptive frequency of a designed test set.")
+            + '<div style="height:14px"></div>'
+            + dl_note(
+                "How to read the 31.6 %",
+                "This is a count inside a set of experiments chosen to explore limits. It is not the probability "
+                "that a fire will go out, or that flame spread will stop, in a real cabin. Runs also changed "
+                "airflow during the test, so the final event does not say what happened earlier.",
+            )
+            + "</div>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('<div class="em"><div class="question-intro"><h2>Traceable records</h2>'
+                '<p>Every row keeps its test identifier, report page, table, and the original comment.</p></div></div>',
+                unsafe_allow_html=True)
+    view = filtered[[
+        "test_id", "sample_width_cm", "oxygen_vol_pct", "airflow_start_cm_s", "airflow_end_cm_s",
+        "airflow_profile", "reused_sample", "observed_outcome", "ignited_explicit",
+        "source_page", "source_table", "original_comment",
+    ]].rename(columns={
+        "test_id": "Test", "sample_width_cm": "Width (cm)", "oxygen_vol_pct": "O₂ (vol. %)",
+        "airflow_start_cm_s": "Start flow (cm/s)", "airflow_end_cm_s": "End flow (cm/s)",
+        "airflow_profile": "Profile", "reused_sample": "Reused", "observed_outcome": "Documented outcome",
+        "ignited_explicit": "Ignition stated", "source_page": "Page", "source_table": "Table",
+        "original_comment": "Original comment",
+    })
+    st.dataframe(view, hide_index=True, width="stretch")
+    st.download_button(
+        "Download these records (CSV)", filtered.to_csv(index=False).encode("utf-8"),
+        file_name="ember_bassii_sibal_filtered.csv", mime="text/csv", key="dl_dl_bass",
+    )
+
+
+def render_same_tab() -> None:
+    import altair as alt
+
+    try:
+        sizes = load_same_sizes()
+    except FileNotFoundError as error:
+        st.error(str(error))
+        return
+
+    st.markdown(
+        '<div class="em">'
+        + dl_note(
+            "What this chart shows",
+            "Published mass-mean particle diameter of smoke from each material, in the base condition and after "
+            "720 seconds of aerosol ageing. Each pair summarises aggregated values from the SAME and SAME-R "
+            "reports; it is not an individual particle.",
+        )
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+    study = st.selectbox("Study", ["All", "SAME", "SAME-R"], key="dl_same_study")
+    view = sizes if study == "All" else sizes[sizes["study"] == study]
+    long = view.melt(
+        id_vars=["study", "material"], value_vars=["base_nm", "aged_720s_nm"],
+        var_name="condition", value_name="diameter_nm",
+    )
+    long["condition"] = long["condition"].map({"base_nm": "Base", "aged_720s_nm": "After 720 s"})
+    long["label"] = long["material"] + " · " + long["study"]
+
+    chart = alt.Chart(long).mark_bar(cornerRadiusEnd=3).encode(
+        x=alt.X("label:N", title=None, sort=None, axis=alt.Axis(labelAngle=-35, labelLimit=160)),
+        xOffset=alt.XOffset("condition:N", sort=["Base", "After 720 s"]),
+        y=alt.Y("diameter_nm:Q", title="Mass-mean diameter (nm)"),
+        color=alt.Color("condition:N", title="Condition", sort=["Base", "After 720 s"],
+                        scale=alt.Scale(domain=["Base", "After 720 s"], range=["#78C8C3", "#F25C05"])),
+        tooltip=[alt.Tooltip("label:N", title="Material"), alt.Tooltip("condition:N", title="Condition"),
+                 alt.Tooltip("diameter_nm:Q", title="Diameter (nm)")],
+    ).properties(height=380)
+    st.altair_chart(dl_style(chart), width="stretch", theme=None)
+
+    best = sizes.loc[sizes["change_pct"].idxmax()]
+    st.markdown(
+        '<div class="em"><div class="evidence-summary">'
+        + dl_stat("Pairs compared", str(len(view)), "Selected study filter.")
+        + dl_stat("Pairs with larger diameter", f"{int((view['change_nm'] > 0).sum())} of {len(view)}",
+                  "Mass-mean diameter only.")
+        + dl_stat("Largest relative change", f"{best['material']} · {best['study']}  +{best['change_pct']:.1f} %",
+                  "Across all nine pairs.")
+        + dl_stat("Smallest relative change", f"+{view['change_pct'].min():.1f} %", "In the selected pairs.")
+        + "</div>"
+        + dl_note(
+            "Limits of this comparison",
+            "The diameter increased in all nine selected pairs, but this holds for the mass-mean descriptor only. "
+            "For SAME-R Teflon, the geometric diameter Dg falls from 81 nm to 70 nm while the mass-mean diameter "
+            "rises from 170 nm to 232 nm. A larger particle does not mean a more toxic smoke or a specific "
+            "probability of detection failure.",
+        )
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+    table = view.rename(columns={
+        "study": "Study", "material": "Material", "descriptor": "Descriptor", "base_nm": "Base (nm)",
+        "aged_720s_nm": "After 720 s (nm)", "change_nm": "Change (nm)", "change_pct": "Change (%)",
+        "source_note": "Source",
+    })
+    st.dataframe(table, hide_index=True, width="stretch",
+                 column_config={"Change (%)": st.column_config.NumberColumn(format="%.1f")})
+    st.download_button(
+        "Download these records (CSV)", view.to_csv(index=False).encode("utf-8"),
+        file_name="ember_same_particle_sizes.csv", mime="text/csv", key="dl_dl_same",
+    )
+
+
+def render_saffire_tab() -> None:
+    import altair as alt
+
+    try:
+        saffire = load_saffire()
+    except FileNotFoundError as error:
+        st.error(str(error))
+        return
+
+    st.markdown(
+        '<div class="em">'
+        + dl_note(
+            "Why Saffire sits next to BASS-II",
+            "Saffire burned larger samples inside the uncrewed Cygnus vehicle. BASS-II used small samples in a "
+            "glovebox duct. The two sets cannot be merged into one dataset, but they show how scale and "
+            "geometry change what a test can tell you.",
+        )
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+    rated = saffire.dropna(subset=["spread_rate_mm_s"]).copy()
+    rated["label"] = rated["investigation"] + " · test " + rated["test_id"]
+    rated["flow"] = rated["flow_cm_s"].map(lambda v: f"{v:g} cm/s")
+    rated["scale"] = rated.apply(
+        lambda r: "Large sample (40.6 × 94 cm)" if r["sample_width_cm"] == 40.6
+        else ("5 × 29 cm sample" if r["sample_width_cm"] == 5 else "Opposed flow, about 10 cm length"),
+        axis=1,
+    )
+    chart = alt.Chart(rated).mark_bar(cornerRadiusEnd=4, color="#F25C05").encode(
+        x=alt.X("label:N", title=None, sort=None, axis=alt.Axis(labelAngle=0, labelLimit=140)),
+        y=alt.Y("spread_rate_mm_s:Q", title="Reported spread rate (mm/s)"),
+        tooltip=[alt.Tooltip("label:N", title="Test"), alt.Tooltip("material:N", title="Material"),
+                 alt.Tooltip("flow:N", title="Airflow"), alt.Tooltip("flow_direction:N", title="Direction"),
+                 alt.Tooltip("oxygen_vol_pct:Q", title="O₂ (vol. %)"),
+                 alt.Tooltip("duration_s:Q", title="Duration (s)"),
+                 alt.Tooltip("scale:N", title="Configuration")],
+    ).properties(height=320, title="Cotton / fiberglass tests with a reported spread rate")
+    st.altair_chart(dl_style(chart), width="stretch", theme=None)
+
+    st.markdown(
+        '<div class="em">'
+        + dl_note(
+            "Limits of this comparison",
+            "Tests 2-5 and 2-6 differ by 0.5 mm/s (2.1 vs 2.6 mm/s, +23.8 %) with airflow of 20 and 25 cm/s. Their "
+            "duration also differs, and two points cannot establish a general relation between flow and spread "
+            "rate. Test 1-2 used opposed flow and a short sample, so it is not directly comparable with the others. "
+            "The four silicone configurations did not sustain spread under the published conditions; this does "
+            "not make silicone non-flammable in other environments. In the composite test 2-7, the PMMA segment "
+            "burned and the Nomex did not ignite, so the components should be read separately.",
+        )
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+    table = saffire.rename(columns={
+        "test_id": "Test", "investigation": "Investigation", "material": "Material",
+        "sample_width_cm": "Width (cm)", "sample_length_cm": "Length (cm)", "thickness_mm": "Thickness (mm)",
+        "flow_cm_s": "Flow (cm/s)", "flow_direction": "Direction", "oxygen_vol_pct": "O₂ (vol. %)",
+        "oxygen_note": "O₂ note", "duration_s": "Duration (s)", "spread_rate_mm_s": "Spread (mm/s)",
+        "documented_outcome": "Documented outcome", "source_note": "Source",
+    })
+    st.dataframe(table, hide_index=True, width="stretch")
+    st.download_button(
+        "Download these records (CSV)", saffire.to_csv(index=False).encode("utf-8"),
+        file_name="ember_saffire_tests.csv", mime="text/csv", key="dl_dl_saffire",
+    )
+
+
+def render_audit_tab(tests: pd.DataFrame) -> None:
+    import altair as alt
+
+    total = len(tests)
+    new = int((tests["reused_sample"] == "No").sum())
+    reused = total - new
+    unspecified = int((tests["observed_outcome"] == "Outcome not specified").sum())
+    eligible = int(tests["model_eligible"].astype(str).str.lower().eq("true").sum())
+    flagged = int((tests["oxygen_caveat"] == "Yes").sum())
+
+    st.markdown(
+        '<div class="em"><div class="evidence-summary">'
+        + dl_stat("Records transcribed", str(total), "BASS-II rows of Table 7.1.")
+        + dl_stat("New / reused samples", f"{new} / {reused}", "Reused samples are context only.")
+        + dl_stat("Outcome not specified", f"{unspecified} of {total}", "A dash in the table is not 'spread'.")
+        + dl_stat("Eligible for a spread classifier", f"{eligible} of {total}", "No row has an explicit label.")
+        + "</div>"
+        + '<div class="documentary-panel"><h2>Decision: no sustained-spread classifier from Table 7.1 alone</h2>'
+        "<p>A supervised model needs a reliable label for every observation. This table records events such as "
+        "quenching, no ignition, and blowoff, which are different mechanisms. It does not state whether sustained "
+        "spread occurred in each run, and the label column was left empty on purpose instead of being inferred. "
+        "Ember therefore shows comparable tests, counts, coverage, and gaps rather than a probability.</p></div>"
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+    reasons = (
+        tests["exclusion_reason"].replace("", "No reason recorded").value_counts()
+        .rename_axis("reason").reset_index(name="tests")
+    )
+    chart = alt.Chart(reasons).mark_bar(cornerRadiusEnd=4, color="#E7B55A").encode(
+        y=alt.Y("reason:N", sort="-x", title=None, axis=alt.Axis(labelLimit=520)),
+        x=alt.X("tests:Q", title="Number of tests", axis=alt.Axis(tickMinStep=1, format="d")),
+        tooltip=["reason:N", "tests:Q"],
+    ).properties(height=250, title="Why each record is excluded from model training")
+    st.altair_chart(dl_style(chart), width="stretch", theme=None)
+
+    left, right = st.columns(2)
+    with left:
+        st.markdown(
+            '<div class="em"><div class="card accent"><h3>What is needed before training</h3>'
+            '<div class="case-list">'
+            + "".join(f'<div class="case-list-item">{escape(i)}</div>' for i in [
+                "Review PSI videos or files and label each test with one uniform sustained-spread rule.",
+                "Record stable-regime duration, spread rate, and time of extinction where available.",
+                "Keep new and reused samples separate and retain the physical sample identifier.",
+                "Split validation by sample or run to avoid leakage; check class balance.",
+                "Evaluate probability calibration, not only classification accuracy.",
+            ])
+            + "</div></div></div>",
+            unsafe_allow_html=True,
+        )
+    with right:
+        st.markdown(
+            '<div class="em"><div class="card accent"><h3>What Data Lab will not show</h3>'
+            '<div class="case-list">'
+            + "".join(f'<div class="case-list-item">{escape(i)}</div>' for i in [
+                "A fire or spread probability, or a safety percentage.",
+                "Interpolation between tests or extrapolation outside the observed ranges.",
+                "Lunar, Martian, or Earth-gravity predictions from ISS microgravity tests.",
+                "Historical accidents as training data or as comparable records.",
+                f"{flagged} records carry an O₂ accuracy flag from NASA and are shown with it.",
+            ])
+            + "</div></div></div>",
+            unsafe_allow_html=True,
+        )
+
+    covered = pd.DataFrame([
+        ("Material", "SIBAL 75 % cotton / 25 % fiberglass", "Any other material"),
+        ("Geometry", "Flat fabric, 0.32 mm thick, 10 cm exposed", "Other geometry or thickness"),
+        ("Sample width", "1.2 or 2.2 cm", "Outside 1.2–2.2 cm; no interpolation"),
+        ("Oxygen", f"{tests['oxygen_vol_pct'].min():.1f}–{tests['oxygen_vol_pct'].max():.1f} vol. %",
+         "Below or above the observed range"),
+        ("Airflow", f"{min(tests['airflow_start_cm_s'].min(), tests['airflow_end_cm_s'].min()):g}–"
+                    f"{max(tests['airflow_start_cm_s'].max(), tests['airflow_end_cm_s'].max()):g} cm/s profiles",
+         "Below or above the observed range"),
+        ("Flow direction", "Concurrent", "Opposed or not stated"),
+        ("Gravity", "ISS microgravity", "Lunar, Martian, or Earth gravity"),
+        ("Pressure", "1 atm", "Any other pressure"),
+    ], columns=["Variable", "Directly covered", "Outside the tested domain"])
+    st.markdown('<div class="em"><div class="question-intro"><h2>Tested domain of the SIBAL subset</h2>'
+                '<p>Ranges are computed from the data. Anything outside them is an evidence gap, not a low-risk case.</p>'
+                '</div></div>', unsafe_allow_html=True)
+    st.dataframe(covered, hide_index=True, width="stretch")
+
+
+def render_data_lab() -> None:
+    nav = render_nav("datalab")
+
+    try:
+        tests = load_bassii_tests()
+    except (FileNotFoundError, ValueError) as error:
+        st.markdown(f'<div class="em">{nav}</div>', unsafe_allow_html=True)
+        st.error(str(error))
+        return
+
+    header = dl_header(
+        "Data Lab",
+        "Explore the structured records behind Ember through tables and descriptive charts. Every mark is a real "
+        "record with its source, and every chart states what it can and cannot support.",
+        [f"{len(tests)} BASS-II / SIBAL tests", "9 SAME / SAME-R pairs", "9 Saffire tests",
+         "Descriptive only: no predictions"],
+    )
+    st.markdown(f'<div class="em">{nav}{header}</div>', unsafe_allow_html=True)
+
+    tab_bass, tab_same, tab_saffire, tab_audit = st.tabs(
+        ["BASS-II · flame spread", "SAME / SAME-R · smoke", "Saffire · scale", "Data audit"]
+    )
+    with tab_bass:
+        render_bassii_tab(tests)
+    with tab_same:
+        render_same_tab()
+    with tab_saffire:
+        render_saffire_tab()
+    with tab_audit:
+        render_audit_tab(tests)
+
+    st.markdown(
+        '<div class="footer">Data Lab is descriptive. Counts and frequencies describe designed experiments; '
+        'they are not fire probabilities, safety ratings, or predictions for conditions that were not tested.</div>',
+        unsafe_allow_html=True,
+    )
+
+
 st.markdown(CSS, unsafe_allow_html=True)
 
 page = get_query_value("page", "home")
@@ -1749,5 +2357,7 @@ elif page == "explorer":
     render_experiment_explorer()
 elif page == "accidents":
     render_accident_cases()
+elif page == "datalab":
+    render_data_lab()
 else:
     render_home()
