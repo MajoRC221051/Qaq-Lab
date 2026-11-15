@@ -321,7 +321,6 @@ hero = html(f"""
     <p class="lead">Ember is an AI-powered scientific evidence navigator that transforms NASA’s overwhelming volume of scattered microgravity combustion research into an interactive tool. We help researchers and students navigate material properties, oxygen levels, and ventilation conditions to answer a crucial question: What NASA evidence supports the safety of our experiment in a spacecraft cabin? By organizing experimental conditions and documented outcomes from the PSI (Physical Science Informatics) database, Ember eliminates the need to search through disconnected reports, empowering teams to evaluate fire safety risks in closed space habitats with confidence.</p>
     <div class="cta-row">
       <a class="btn" href="#about">Understand Ember</a>
-      <span class="scope-note">Prototype scope: BASS-II / SIBAL and SAME</span>
     </div>
   </div>
   <div class="visual">{load_gif_html()}</div>
@@ -404,10 +403,7 @@ body = html(
       </div>
     </div>
 
-    <div class="scope">
-      <h2>Prototype scope</h2>
-      <p>The current prototype matches questions against available BASS-II/SIBAL records and routes smoke-detection questions to SAME documentation. It does not estimate fire risk, replace the original scientific reports, or generalize results to experimental conditions that were not tested.</p>
-    </div>
+   
 
     <div class="footer">Ember — Experimental evidence organized for research.</div>
     """
