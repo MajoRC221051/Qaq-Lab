@@ -22,12 +22,12 @@ BASSII_REPORT_URL = "https://ntrs.nasa.gov/citations/20210011385"
 SAME_PSI_URL = "https://psi.nasa.gov/physci/repo/data/investigations/PSI-102"
 
 GIF_CANDIDATES = [
-    ASSETS_DIR / "ember.gif.gif",
     ASSETS_DIR / "ember.gif",
-    ASSETS_DIR / "ember_gif.gif",
-    BASE_DIR / "ember.gif.gif",
+    ASSETS_DIR / "ember.gif",
+    ASSETS_DIR / "ember.gif",
     BASE_DIR / "ember.gif",
-    BASE_DIR / "ember_gif.gif",
+    BASE_DIR / "ember.gif",
+    BASE_DIR / "ember.gif",
 ]
 
 CSS = """
