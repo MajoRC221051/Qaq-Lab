@@ -242,6 +242,12 @@ div[data-testid="stDownloadButton"] button { background: transparent; color: var
 div[data-testid="stDownloadButton"] button:hover { background: rgba(242,92,5,0.12); color: var(--text);
   border-color: var(--ember); }
 
+table.assess { width: 100%; border-collapse: collapse; margin: 18px 0 8px; font-size: 0.86rem; }
+table.assess th { text-align: left; color: var(--muted); font-weight: 600; font-size: 0.72rem;
+  letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+table.assess td { padding: 12px; border-bottom: 1px solid var(--border); color: #cfcfcc; vertical-align: top; }
+table.assess td strong { color: var(--text); }
+
 .footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--border);
   color: var(--muted); font-size: 0.88rem; text-align: center; }
 
@@ -1824,7 +1830,7 @@ def dl_header(title: str, text: str, chips: list[str]) -> str:
     strip = "".join(f'<span class="dataset-stat">{escape(c)}</span>' for c in chips)
     return f"""
     <div class="explorer-header">
-      <div class="eyebrow">DESCRIPTIVE DATA EXPLORATION</div>
+      <div class="eyebrow">EXPERIMENT CONDITIONS CHECK</div>
       <h1>{escape(title)}</h1>
       <p>{escape(text)}</p>
       <div class="dataset-strip">{strip}</div>
@@ -1858,7 +1864,7 @@ def spread_offsets(frame: pd.DataFrame) -> pd.Series:
     return ((rank - (size - 1) / 2) * 0.07).where(size > 1, 0.0)
 
 
-def bassii_chart(frame: pd.DataFrame, scenario: dict | None, envelope: dict):
+def bassii_chart(frame: pd.DataFrame, scenario: dict | None, envelope: dict, highlight: list | None = None):
     import altair as alt
 
     plot = frame.copy()
@@ -1932,9 +1938,22 @@ def bassii_chart(frame: pd.DataFrame, scenario: dict | None, envelope: dict):
     ).encode(x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale), tooltip=tooltip)
 
     layers = [box, segment, start, end, flagged]
+    if highlight:
+        layers.append(
+            alt.Chart(plot[plot["test_id"].isin(highlight)]).mark_point(
+                shape="circle", size=420, filled=False, stroke="#FFFFFF", strokeWidth=1.8,
+            ).encode(x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale), tooltip=tooltip)
+        )
     if scenario:
         sc = pd.DataFrame([{"o2": scenario["oxygen_vol_pct"], "flow": scenario["airflow_start_cm_s"],
                             "label": "Your scenario"}])
+        end_flow = scenario.get("airflow_end_cm_s")
+        if end_flow is not None and abs(end_flow - scenario["airflow_start_cm_s"]) > 1e-9:
+            seg = pd.DataFrame([{"o2": scenario["oxygen_vol_pct"], "f0": scenario["airflow_start_cm_s"], "f1": end_flow}])
+            layers.append(alt.Chart(seg).mark_rule(color="#FFFFFF", strokeDash=[3, 3], strokeWidth=1.5).encode(
+                x="o2:Q", y=alt.Y("f0:Q", scale=y_scale), y2="f1:Q"))
+            layers.append(alt.Chart(seg).mark_point(shape="cross", size=200, strokeWidth=2, filled=False,
+                                                   color="#FFFFFF").encode(x="o2:Q", y=alt.Y("f1:Q", scale=y_scale)))
         layers.append(
             alt.Chart(sc).mark_point(shape="cross", size=260, strokeWidth=3, color="#FFFFFF").encode(
                 x="o2:Q", y=alt.Y("flow:Q", scale=y_scale),
@@ -2310,6 +2329,433 @@ def render_audit_tab(tests: pd.DataFrame) -> None:
     st.dataframe(covered, hide_index=True, width="stretch")
 
 
+# ---------------------------------------------------------------------------
+# Data Lab: test my conditions
+# ---------------------------------------------------------------------------
+
+BADGE = {"Covered": "direct", "Partial": "partial", "Outside": "outside", "Not reported": "documentary"}
+
+LAB_MATERIALS = [
+    "SIBAL fabric (75% cotton / 25% fiberglass)",
+    "Other cotton / fiberglass blend",
+    "Silicone",
+    "PMMA",
+    "Nomex",
+    "Kapton",
+    "Teflon",
+    "Other material",
+]
+SAFFIRE_MATERIAL_KEY = {
+    "SIBAL fabric (75% cotton / 25% fiberglass)": "Cotton / fiberglass",
+    "Other cotton / fiberglass blend": "Cotton / fiberglass",
+    "Silicone": "Silicone",
+    "PMMA": "PMMA and Nomex composite",
+    "Nomex": "PMMA and Nomex composite",
+}
+SAME_MATERIAL_KEY = {"Kapton": "Kapton", "Teflon": "Teflon", "Silicone": "Silicone"}
+
+
+def lab_row(variable, value, tested, status, message, action) -> dict:
+    return {"variable": variable, "value": value, "tested": tested, "status": status,
+            "message": message, "action": action}
+
+
+def assess_spread_scenario(tests: pd.DataFrame, s: dict) -> list[dict]:
+    o2_vals = tests["oxygen_vol_pct"].dropna()
+    o2_lo, o2_hi = float(o2_vals.min()), float(o2_vals.max())
+    flows = pd.concat([tests["airflow_start_cm_s"], tests["airflow_end_cm_s"]]).dropna()
+    f_lo, f_hi = float(flows.min()), float(flows.max())
+    widths = sorted(tests["sample_width_cm"].dropna().unique())
+    rows = []
+
+    mat = s["material"]
+    if mat == LAB_MATERIALS[0]:
+        rows.append(lab_row("Material", "SIBAL fabric", "SIBAL 75% cotton / 25% fiberglass", "Covered",
+                            "Same fabric as the BASS-II subset.", "None."))
+    elif mat == LAB_MATERIALS[1]:
+        rows.append(lab_row("Material", "Other cotton / fiberglass blend", "SIBAL 75/25 only", "Partial",
+                            "Related composition, but a different blend can burn differently.",
+                            "Characterize your blend and compare it with SIBAL before reusing these results."))
+    else:
+        rows.append(lab_row("Material", mat, "SIBAL 75/25 only", "Outside",
+                            "There is no defensible transfer between materials in BASS-II.",
+                            "Request tests of your actual material. Related larger-scale evidence is listed below if it exists."))
+
+    rows.append(
+        lab_row("Geometry", s["geometry"], "Flat sheet, 0.32 mm, 10 cm exposed",
+                "Covered" if s["geometry"] == "Flat fabric sheet" else "Outside",
+                "Heat and mass transfer match the tested sheet." if s["geometry"] == "Flat fabric sheet"
+                else "A rod, cylinder, or thick plate is not equivalent to a thin sheet.",
+                "None." if s["geometry"] == "Flat fabric sheet" else "Test the real configuration.")
+    )
+
+    t = s["thickness_mm"]
+    t_ref = float(tests["thickness_mm"].dropna().iloc[0])
+    if abs(t - t_ref) < 1e-6:
+        st_t, msg_t = "Covered", "Matches the tested thickness."
+    elif abs(t - t_ref) / t_ref <= 0.25:
+        st_t, msg_t = "Partial", "Close to the tested thickness, but not tested at this value."
+    else:
+        st_t, msg_t = "Outside", "Thickness is not comparable with the tested sheet."
+    rows.append(lab_row("Thickness", f"{t:g} mm", f"{t_ref:g} mm", st_t, msg_t,
+                        "None." if st_t == "Covered" else "Test your thickness; do not scale from 0.32 mm."))
+
+    w = s["width_cm"]
+    if any(abs(w - v) < 1e-9 for v in widths):
+        st_w, msg_w, act_w = "Covered", "A tested width.", "None."
+    elif min(widths) < w < max(widths):
+        st_w, msg_w, act_w = ("Partial", "Between the two tested widths. The flammable domain differs by width.",
+                              "Do not interpolate without validation.")
+    else:
+        st_w, msg_w, act_w = "Outside", "Outside the tested widths.", "Test your width."
+    rows.append(lab_row("Sample width", f"{w:g} cm", " or ".join(f"{v:g}" for v in widths) + " cm",
+                        st_w, msg_w, act_w))
+
+    o2 = s["oxygen"]
+    same_o2 = tests[(tests["oxygen_vol_pct"] - o2).abs() < 0.05]
+    if o2 < o2_lo or o2 > o2_hi:
+        st_o, msg_o, act_o = ("Outside", "Oxygen is outside the observed range.",
+                              "Do not estimate. Design a controlled test at this oxygen level.")
+    elif len(same_o2):
+        st_o, msg_o, act_o = "Covered", f"{len(same_o2)} test(s) at this oxygen level.", "None."
+        if (same_o2["oxygen_caveat"] == "Yes").any():
+            msg_o += " NASA flags the O₂ reading in some of them as possibly inaccurate."
+    else:
+        st_o, msg_o, act_o = ("Partial", "Inside the range, but no test was run at this exact value.",
+                              "Compare the nearest tests; do not interpolate an outcome.")
+    rows.append(lab_row("Oxygen", f"{o2:g} vol. %", f"{o2_lo:g}–{o2_hi:g} vol. %", st_o, msg_o, act_o))
+
+    p = s["pressure_atm"]
+    rows.append(lab_row("Total pressure", f"{p:g} atm", "1 atm", "Covered" if abs(p - 1) < 1e-9 else "Outside",
+                        "Matches the tested pressure." if abs(p - 1) < 1e-9
+                        else "The subset has no reduced-pressure tests. Pressure is separate from oxygen percentage.",
+                        "None." if abs(p - 1) < 1e-9 else "Look for or run a test at this pressure."))
+
+    g_ok = s["gravity"] == "Microgravity (ISS)"
+    rows.append(lab_row("Gravity", s["gravity"], "Microgravity (ISS)", "Covered" if g_ok else "Outside",
+                        "Matches the ISS microgravity tests." if g_ok
+                        else "ISS results do not transfer to Lunar, Martian, or Earth gravity. PSI has no partial-gravity data here.",
+                        "None." if g_ok else "Show as an evidence gap; a partial-gravity test is required."))
+
+    d_ok = s["direction"] == "Concurrent"
+    rows.append(lab_row("Flow direction", s["direction"], "Concurrent", "Covered" if d_ok else "Outside",
+                        "Same direction as the tests." if d_ok
+                        else "Flow direction changes the spread mechanism.",
+                        "None." if d_ok else "Use a different experimental subset."))
+
+    fs, fe = s["flow_start"], s["flow_end"]
+    profile = "Constant" if abs(fs - fe) < 1e-9 else ("Decreasing" if fe < fs else "Increasing")
+    exact_flow = tests[(tests["airflow_start_cm_s"] - fs).abs().lt(1e-9) & (tests["airflow_end_cm_s"] - fe).abs().lt(1e-9)]
+    in_range = f_lo <= min(fs, fe) and max(fs, fe) <= f_hi
+    if not in_range:
+        st_f, msg_f, act_f = ("Outside", "Airflow is outside the observed range.",
+                              "Do not extrapolate; evaluate several controlled points.")
+    elif len(exact_flow):
+        st_f, msg_f, act_f = "Covered", f"{len(exact_flow)} test(s) with this {profile.lower()} profile.", "None."
+    else:
+        st_f, msg_f, act_f = ("Partial", "Both values are in range, but this start → end profile was not tested.",
+                              "Compare whole profiles, not a single number; airflow has no universal monotonic effect.")
+    rows.append(lab_row("Airflow", f"{fs:g} → {fe:g} cm/s ({profile.lower()})", f"{f_lo:g}–{f_hi:g} cm/s profiles",
+                        st_f, msg_f, act_f))
+
+    if s["reused"]:
+        rows.append(lab_row("Sample condition", "Reused sample", "New samples", "Partial",
+                            "Thermal history and shorter unburned length reduce comparability.",
+                            "Use only as context; prefer new samples."))
+    else:
+        rows.append(lab_row("Sample condition", "New sample", "New samples", "Covered", "Comparable.", "None."))
+    return rows
+
+
+def lab_verdict(rows: list[dict], direct: pd.DataFrame, spread: bool = True) -> tuple[str, str, str]:
+    statuses = [r["status"] for r in rows]
+    if "Outside" in statuses:
+        outs = ", ".join(r["variable"].lower() for r in rows if r["status"] == "Outside")
+        return ("Outside", "Outside the tested domain",
+                f"These conditions are not represented in the PSI subset Ember holds: {outs}. "
+                "The tests below can inform mechanisms at most; they cannot support conclusions for your scenario.")
+    if "Partial" in statuses or direct.empty:
+        return ("Partial", "Partial coverage",
+                "Some conditions match, but this exact combination was not tested. Review the nearest tests and "
+                "the differences, and treat them as comparisons rather than predictions.")
+    return ("Covered", "Directly represented",
+            "At least one test matches every condition you entered. That gives documented outcomes for those "
+            "conditions, not a probability" + (", and the source table does not label sustained spread." if spread
+            else ". Particle size is not toxicity or detector performance."))
+
+
+def lab_ruler_chart(tests: pd.DataFrame, s: dict):
+    import altair as alt
+
+    flows = pd.concat([tests["airflow_start_cm_s"], tests["airflow_end_cm_s"]])
+    items = [
+        ("Oxygen (vol. %)", tests["oxygen_vol_pct"].min(), tests["oxygen_vol_pct"].max(), s["oxygen"]),
+        ("Airflow start (cm/s)", flows.min(), flows.max(), s["flow_start"]),
+        ("Airflow end (cm/s)", flows.min(), flows.max(), s["flow_end"]),
+        ("Width (cm)", tests["sample_width_cm"].min(), tests["sample_width_cm"].max(), s["width_cm"]),
+    ]
+    charts = []
+    for label, lo, hi, val in items:
+        inside = lo <= val <= hi
+        pad = (hi - lo) * 0.35 or 1.0
+        dom = [min(lo, val) - pad * 0.2, max(hi, val) + pad * 0.2]
+        df = pd.DataFrame([{"lo": float(lo), "hi": float(hi), "val": float(val),
+                            "state": "Inside tested range" if inside else "Outside tested range"}])
+        x = alt.X("lo:Q", scale=alt.Scale(domain=dom, zero=False, nice=False), title=None)
+        band = alt.Chart(df).mark_bar(height=14, color="#78C8C3", opacity=0.35, cornerRadius=7).encode(
+            x=x, x2="hi:Q")
+        mark = alt.Chart(df).mark_point(shape="diamond", size=190, filled=True, stroke="#090909",
+                                        strokeWidth=1.5).encode(
+            x=alt.X("val:Q", scale=alt.Scale(domain=dom, zero=False, nice=False)),
+            color=alt.Color("state:N", scale=alt.Scale(
+                domain=["Inside tested range", "Outside tested range"], range=["#F25C05", "#D89595"]),
+                legend=None),
+            tooltip=[alt.Tooltip("val:Q", title="Your value"), alt.Tooltip("lo:Q", title="Tested min"),
+                     alt.Tooltip("hi:Q", title="Tested max")],
+        )
+        charts.append(alt.layer(band, mark).properties(height=46, title=label))
+    return dl_style(alt.vconcat(*charts).resolve_scale(x="independent"))
+
+
+def render_spread_lab(tests: pd.DataFrame) -> None:
+    st.markdown(
+        '<div class="em"><div class="question-intro"><h2>Describe your experiment</h2>'
+        '<p>Enter the conditions you plan to use. Ember compares each one with the tested domain and finds the '
+        'closest PSI tests. It judges how well the evidence covers your conditions, not whether they are safe.</p>'
+        '</div></div>', unsafe_allow_html=True)
+
+    a, b, c = st.columns(3)
+    with a:
+        material = st.selectbox("Material", LAB_MATERIALS, key="lab_material")
+        geometry = st.selectbox("Geometry", ["Flat fabric sheet", "Rod or cylinder", "Thick plate", "Other"],
+                                key="lab_geometry")
+        thickness = st.number_input("Thickness (mm)", 0.01, 50.0, 0.32, 0.01, key="lab_thick")
+        width = st.number_input("Sample width (cm)", 0.1, 100.0, 2.2, 0.1, key="lab_width")
+    with b:
+        oxygen = st.number_input("Oxygen (vol. %)", 0.0, 100.0, 18.7, 0.1, key="lab_o2")
+        pressure = st.number_input("Total pressure (atm)", 0.1, 5.0, 1.0, 0.05, key="lab_p")
+        gravity = st.selectbox("Gravity", ["Microgravity (ISS)", "Lunar (1/6 g)", "Martian (0.38 g)", "Earth (1 g)"],
+                               key="lab_g")
+        reused = st.checkbox("Sample was already used in a previous test", key="lab_reused")
+    with c:
+        direction = st.selectbox("Flow direction", ["Concurrent", "Opposed", "Not defined"], key="lab_dir")
+        flow_start = st.number_input("Airflow at start (cm/s)", 0.0, 500.0, 10.0, 0.5, key="lab_fs")
+        flow_end = st.number_input("Airflow at end (cm/s)", 0.0, 500.0, 2.2, 0.1, key="lab_fe")
+        st.caption("Use the same value twice for constant airflow.")
+
+    s = {"material": material, "geometry": geometry, "thickness_mm": thickness, "width_cm": width,
+         "oxygen": oxygen, "pressure_atm": pressure, "gravity": gravity, "reused": reused,
+         "direction": direction, "flow_start": flow_start, "flow_end": flow_end}
+
+    rows = assess_spread_scenario(tests, s)
+    profile = "Constant" if abs(flow_start - flow_end) < 1e-9 else ("Decreasing" if flow_end < flow_start else "Increasing")
+    query = {"oxygen_vol_pct": oxygen, "airflow_start_cm_s": flow_start, "airflow_end_cm_s": flow_end,
+             "sample_width_cm": width, "airflow_profile": profile,
+             "reused_sample": "Yes" if reused else "No"}
+    direct = tests[
+        (tests["oxygen_vol_pct"] - oxygen).abs().lt(0.05)
+        & (tests["airflow_start_cm_s"] - flow_start).abs().lt(1e-9)
+        & (tests["airflow_end_cm_s"] - flow_end).abs().lt(1e-9)
+        & (tests["sample_width_cm"] - width).abs().lt(1e-9)
+        & (tests["reused_sample"] == query["reused_sample"])
+    ]
+    status, title, text = lab_verdict(rows, direct)
+    n_cov = sum(r["status"] == "Covered" for r in rows)
+
+    st.markdown(
+        '<div class="em"><div class="result-explanation" style="margin-top:22px">'
+        f'<span class="coverage-badge {BADGE[status]}">{escape(title)}</span>'
+        f'<h3 style="margin-top:14px">{n_cov} of {len(rows)} conditions are directly covered</h3>'
+        f'<p>{escape(text)}</p></div></div>', unsafe_allow_html=True)
+
+    # Per-variable table
+    body = "".join(
+        f'<tr><td><strong>{escape(r["variable"])}</strong></td><td>{escape(r["value"])}</td>'
+        f'<td>{escape(r["tested"])}</td>'
+        f'<td><span class="coverage-badge {BADGE[r["status"]]}">{escape(r["status"])}</span></td>'
+        f'<td>{escape(r["message"])}</td></tr>' for r in rows)
+    st.markdown(
+        '<div class="em"><table class="assess"><thead><tr><th>Condition</th><th>Your value</th>'
+        '<th>Tested in PSI subset</th><th>Status</th><th>What it means</th></tr></thead>'
+        f'<tbody>{body}</tbody></table></div>', unsafe_allow_html=True)
+
+    # Charts
+    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Where your conditions fall</h2>'
+                '<p>Left: your value against the tested range for each numeric condition. Right: your scenario '
+                'among the real tests; the white cross is your start, the open cross your end airflow.</p></div></div>',
+                unsafe_allow_html=True)
+    envelope = {
+        "o2_lo": float(tests["oxygen_vol_pct"].min()), "o2_hi": float(tests["oxygen_vol_pct"].max()),
+        "flow_lo": float(min(tests["airflow_start_cm_s"].min(), tests["airflow_end_cm_s"].min())),
+        "flow_hi": float(max(tests["airflow_start_cm_s"].max(), tests["airflow_end_cm_s"].max())),
+    }
+    ranked = rank_evidence_records(tests, query)
+    top = ranked.head(3)
+    left, right = st.columns([2, 3])
+    with left:
+        st.altair_chart(lab_ruler_chart(tests, s), width="stretch", theme=None)
+    with right:
+        scenario = {"oxygen_vol_pct": oxygen, "airflow_start_cm_s": flow_start, "airflow_end_cm_s": flow_end}
+        st.altair_chart(bassii_chart(tests, scenario, envelope, highlight=top["test_id"].tolist()),
+                        width="stretch", theme=None)
+    st.caption("Rings mark the three closest tests. Being inside a range does not mean the combination was tested.")
+
+    # Nearest tests
+    material_blocked = rows[0]["status"] == "Outside" or rows[1]["status"] == "Outside"
+    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Closest BASS-II tests</h2>'
+                '<p>Ranked by how many of your conditions match, then by distance. Differences are shown, '
+                'never hidden.</p></div></div>', unsafe_allow_html=True)
+    if material_blocked:
+        st.warning("Your material or geometry is not the one tested in BASS-II/SIBAL, so these tests are not "
+                   "comparable evidence. They are shown only to illustrate how the experiment was run.")
+    for _, row in top.iterrows():
+        matched, different = compare_record_to_query(row, query)
+        chips = "".join(f'<span class="condition-chip">✓ {escape(m)}</span>' for m in matched)
+        diffs = "".join(f'<p class="why">≠ {escape(d)}</p>' for d in different)
+        flag = ""
+        if row["oxygen_caveat"] == "Yes":
+            flag = '<p class="why">⚠ NASA flags this O₂ reading as possibly inaccurate.</p>'
+        st.markdown(
+            f'<div class="em"><div class="match-card"><h3>{escape(row["test_id"])} · {escape(row["observed_outcome"])}</h3>'
+            f'<div class="condition-chips">{chips or "<span class=condition-chip>No condition matches exactly</span>"}</div>'
+            f'{diffs}{flag}'
+            f'<p class="limitation">{escape(str(row["exclusion_reason"]))} · Source: report p. {int(row["source_page"])}, '
+            f'{escape(row["source_table"])}.</p></div></div>', unsafe_allow_html=True)
+
+    # Related evidence: Saffire + historical context
+    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Similar cases in PSI</h2>'
+                '<p>Other investigations with a related material. Different scale and conditions: use them to '
+                'understand, not to transfer numbers.</p></div></div>', unsafe_allow_html=True)
+    key = SAFFIRE_MATERIAL_KEY.get(material)
+    saffire = load_saffire()
+    related = saffire[saffire["material"] == key] if key else saffire.iloc[0:0]
+    if related.empty:
+        st.info("Ember has no related larger-scale record for this material. That is an evidence gap, not a "
+                "sign of low risk.")
+    else:
+        view = related[["investigation", "test_id", "material", "flow_cm_s", "flow_direction",
+                        "oxygen_vol_pct", "spread_rate_mm_s", "documented_outcome"]].rename(columns={
+            "investigation": "Study", "test_id": "Test", "material": "Material", "flow_cm_s": "Flow (cm/s)",
+            "flow_direction": "Direction", "oxygen_vol_pct": "O₂ (vol. %)", "spread_rate_mm_s": "Spread (mm/s)",
+            "documented_outcome": "Documented outcome"})
+        st.dataframe(view, hide_index=True, width="stretch")
+        st.caption("Saffire used much larger samples inside the Cygnus vehicle. Compare O₂, flow, and direction "
+                   "with your scenario before drawing any parallel.")
+
+    try:
+        cases = load_accident_cases()
+        linked = cases[cases["related_psi"] == "BASS-II"]
+    except (FileNotFoundError, ValueError):
+        linked = pd.DataFrame()
+    for _, case in linked.iterrows():
+        st.markdown(
+            f'<div class="em"><div class="psi-connection"><h3>Historical context: {escape(case["title"])}</h3>'
+            f'<p>{escape(case["psi_relation_note"])}</p>'
+            f'<p class="evidence-boundary">{escape(case["interpretation_limit"])}</p></div></div>',
+            unsafe_allow_html=True)
+
+    # Next steps + report
+    gaps = [r for r in rows if r["status"] in ("Outside", "Partial")]
+    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>What would complete the evidence</h2>'
+                '</div></div>', unsafe_allow_html=True)
+    if gaps:
+        items = "".join(
+            f'<div class="case-list-item"><strong>{escape(r["variable"])}:</strong> {escape(r["action"])}</div>'
+            for r in gaps)
+        st.markdown(f'<div class="em"><div class="case-list">{items}</div></div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="em"><div class="case-list"><div class="case-list-item">All entered conditions '
+                    'are covered. The remaining gap is a sustained-spread label per test, which requires '
+                    'reviewing PSI videos or files.</div></div></div>', unsafe_allow_html=True)
+
+    report = "\n".join(
+        [f"Ember Data Lab scenario report", f"Verdict: {title}", ""]
+        + [f"- {r['variable']}: {r['value']} | tested: {r['tested']} | {r['status']} | {r['action']}" for r in rows]
+        + ["", "Closest tests: " + ", ".join(top["test_id"]),
+           "Descriptive coverage only; not a fire probability or safety rating."])
+    st.download_button("Download scenario report (TXT)", report.encode("utf-8"),
+                       file_name="ember_scenario_report.txt", mime="text/plain", key="lab_dl")
+
+
+def render_smoke_lab() -> None:
+    import altair as alt
+
+    sizes = load_same_sizes()
+    st.markdown('<div class="em"><div class="question-intro"><h2>Describe your smoke measurement</h2>'
+                '<p>SAME and SAME-R measured smoke particle size for a few materials in microgravity, at the '
+                'start and after 720 s of ageing.</p></div></div>', unsafe_allow_html=True)
+    a, b, c = st.columns(3)
+    with a:
+        material = st.selectbox("Source material", ["Kapton", "Cotton wick", "Silicone", "Teflon", "Pyrell",
+                                                    "Other material"], key="lab_smoke_mat")
+    with b:
+        age = st.number_input("Aerosol ageing time (s)", 0, 7200, 720, 60, key="lab_smoke_age")
+    with c:
+        gravity = st.selectbox("Gravity", ["Microgravity (ISS)", "Lunar (1/6 g)", "Martian (0.38 g)", "Earth (1 g)"],
+                               key="lab_smoke_g")
+
+    have = sizes[sizes["material"] == material]
+    rows = []
+    rows.append(lab_row("Material", material, ", ".join(sorted(sizes["material"].unique())),
+                        "Covered" if len(have) else "Outside",
+                        f"Measured in {', '.join(have['study'])}." if len(have) else "No smoke-size data for this material.",
+                        "None." if len(have) else "Request SAME-type measurements for your material."))
+    rows.append(lab_row("Ageing time", f"{age} s", "0 s (base) and 720 s",
+                        "Covered" if age in (0, 720) else ("Partial" if 0 < age < 720 else "Outside"),
+                        "A measured condition." if age in (0, 720) else
+                        ("Between the two measured points; the curve was not measured." if age < 720
+                         else "Longer than any measured ageing."),
+                        "None." if age in (0, 720) else "Do not interpolate; measure at your ageing time."))
+    g_ok = gravity == "Microgravity (ISS)"
+    rows.append(lab_row("Gravity", gravity, "Microgravity (ISS)", "Covered" if g_ok else "Outside",
+                        "Matches the ISS measurements." if g_ok else "Smoke transport and particle behaviour change with gravity.",
+                        "None." if g_ok else "Show as an evidence gap."))
+    status, title, text = lab_verdict(rows, have, spread=False)
+    st.markdown(
+        '<div class="em"><div class="result-explanation" style="margin-top:22px">'
+        f'<span class="coverage-badge {BADGE[status]}">{escape(title)}</span>'
+        f'<p style="margin-top:12px">{escape(text)}</p></div>'
+        '<table class="assess"><thead><tr><th>Condition</th><th>Your value</th><th>Tested</th><th>Status</th>'
+        '<th>What it means</th></tr></thead><tbody>'
+        + "".join(f'<tr><td><strong>{escape(r["variable"])}</strong></td><td>{escape(r["value"])}</td>'
+                  f'<td>{escape(r["tested"])}</td><td><span class="coverage-badge {BADGE[r["status"]]}">'
+                  f'{escape(r["status"])}</span></td><td>{escape(r["message"])}</td></tr>' for r in rows)
+        + '</tbody></table></div>', unsafe_allow_html=True)
+
+    if len(have):
+        long = have.melt(id_vars=["study", "material"], value_vars=["base_nm", "aged_720s_nm"],
+                         var_name="condition", value_name="nm")
+        long["condition"] = long["condition"].map({"base_nm": "Base (0 s)", "aged_720s_nm": "After 720 s"})
+        chart = alt.Chart(long).mark_bar(cornerRadiusEnd=4).encode(
+            x=alt.X("study:N", title=None, axis=alt.Axis(labelAngle=0)),
+            xOffset="condition:N", y=alt.Y("nm:Q", title="Mass-mean diameter (nm)"),
+            color=alt.Color("condition:N", scale=alt.Scale(domain=["Base (0 s)", "After 720 s"],
+                            range=["#78C8C3", "#F25C05"]), title=None),
+            tooltip=["study:N", "condition:N", "nm:Q"],
+        ).properties(height=260, title=f"{material}: measured particle size")
+        st.altair_chart(dl_style(chart), width="stretch", theme=None)
+        st.caption("Mass-mean diameter only; other descriptors can move differently, and size is not toxicity or "
+                   "detector performance.")
+
+
+def render_lab_tab(tests: pd.DataFrame) -> None:
+    goal = st.radio(
+        "What do you want to check?",
+        ["Flame spread on a solid material", "Smoke detection", "Fire suppression"],
+        horizontal=True, key="lab_goal",
+    )
+    if goal == "Flame spread on a solid material":
+        render_spread_lab(tests)
+    elif goal == "Smoke detection":
+        render_smoke_lab()
+    else:
+        st.markdown(
+            '<div class="em"><div class="documentary-panel"><h2>Suppression is not covered yet</h2>'
+            '<p>Suppression studies such as FLEX (dilution with CO₂ or helium) are not in the structured data '
+            'Ember holds, so Data Lab cannot assess them. This is a gap in Ember, not evidence about suppression. '
+            'Check the Library for the PSI record and its reports.</p></div></div>', unsafe_allow_html=True)
+
+
 def render_data_lab() -> None:
     nav = render_nav("datalab")
 
@@ -2322,16 +2768,18 @@ def render_data_lab() -> None:
 
     header = dl_header(
         "Data Lab",
-        "Explore the structured records behind Ember through tables and descriptive charts. Every mark is a real "
-        "record with its source, and every chart states what it can and cannot support.",
+        "Enter the conditions of your experiment and see how well NASA PSI evidence covers them: which tests "
+        "match, which conditions fall outside what was tested, and what would be needed to complete the evidence.",
         [f"{len(tests)} BASS-II / SIBAL tests", "9 SAME / SAME-R pairs", "9 Saffire tests",
-         "Descriptive only: no predictions"],
+         "Coverage of evidence, not predictions"],
     )
     st.markdown(f'<div class="em">{nav}{header}</div>', unsafe_allow_html=True)
 
-    tab_bass, tab_same, tab_saffire, tab_audit = st.tabs(
-        ["BASS-II · flame spread", "SAME / SAME-R · smoke", "Saffire · scale", "Data audit"]
+    tab_lab, tab_bass, tab_same, tab_saffire, tab_audit = st.tabs(
+        ["Test my conditions", "Browse BASS-II", "Browse SAME / SAME-R", "Browse Saffire", "Data audit"]
     )
+    with tab_lab:
+        render_lab_tab(tests)
     with tab_bass:
         render_bassii_tab(tests)
     with tab_same:
