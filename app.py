@@ -970,7 +970,7 @@ def evidence_summary(
     reviewed: str,
     found: str,
 ) -> str:
-    return f"""
+    return html(f"""
     <div class="evidence-summary">
       <div class="summary-item">
         <div class="summary-label">Routed to</div>
@@ -989,7 +989,7 @@ def evidence_summary(
         <div class="summary-value">{escape(found)}</div>
       </div>
     </div>
-    """
+    """)
 
 
 def match_card(
@@ -1040,7 +1040,7 @@ def match_card(
     if not limitation:
         limitation = "No record-specific limitation was reported in the curated table."
 
-    return f"""
+    return html(f"""
     <div class="match-card">
       <div class="psi-id">{escape(str(row['test_id']))} · BASS-II</div>
       <h3>{escape(str(row['material']))}</h3>
@@ -1060,7 +1060,7 @@ def match_card(
         <a class="source-link" href="{BASSII_REPORT_URL}" target="_blank" rel="noopener noreferrer">Open source report</a>
       </div>
     </div>
-    """
+    """)
 
 
 def render_flame_results(
@@ -1114,12 +1114,12 @@ def render_flame_results(
         str(len(tests)),
         found,
     )
-    explanation_panel = f"""
+    explanation_panel = html(f"""
     <div class="result-explanation">
       <h3>Why this result</h3>
       <p>{escape(explanation)}</p>
     </div>
-    """
+    """)
 
     st.markdown(
         f'<div class="em">{summary}{explanation_panel}</div>',
@@ -1151,7 +1151,7 @@ def render_same_results(request: dict[str, object]) -> None:
         "1 relevant investigation",
     )
 
-    panel = f"""
+    panel = html(f"""
     <div class="result-explanation">
       <h3>Why this result</h3>
       <p>SAME is relevant because the submitted question concerns {escape(focus.lower())}. The selected material is {escape(material)}. SAME examined smoke-particle behavior and spacecraft detector response under low-gravity conditions.</p>
@@ -1167,7 +1167,7 @@ def render_same_results(request: dict[str, object]) -> None:
         <a class="source-link secondary" href="{SAME_PSI_URL}" target="_blank" rel="noopener noreferrer">Open in NASA PSI</a>
       </div>
     </div>
-    """
+    """)
 
     st.markdown(
         f'<div class="em">{summary}{panel}</div>',
@@ -1190,7 +1190,7 @@ def render_experiment_explorer() -> None:
     airflow_min = float(tests["airflow_start_cm_s"].min())
     airflow_max = float(tests["airflow_start_cm_s"].max())
 
-    header = f"""
+    header = html(f"""
     <div class="explorer-header">
       <div class="eyebrow">EVIDENCE ROUTING AND COVERAGE</div>
       <h1>Experiment Explorer</h1>
@@ -1206,7 +1206,7 @@ def render_experiment_explorer() -> None:
       <h2>Build a research question</h2>
       <p>Select only the conditions that matter. Conditions left at Any are not used when comparing records.</p>
     </div>
-    """
+    """)
     st.markdown(
         f'<div class="em">{nav}{header}</div>',
         unsafe_allow_html=True,
