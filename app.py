@@ -6,12 +6,12 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(
-    page_title="Q’AQ’ Lab",
-    layout="wide",
-    initial_sidebar_state="collapsed",
+page_title="Q’AQ’ Lab",
+layout="wide",
+initial_sidebar_state="collapsed",
 )
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(file).resolve().parent
 ASSETS_DIR = BASE_DIR / "assets"
 DATA_DIR = BASE_DIR / "data"
 INVESTIGATIONS_PATH = DATA_DIR / "investigations.csv"
@@ -22,15 +22,16 @@ BASSII_REPORT_URL = "https://ntrs.nasa.gov/citations/20210011385"
 SAME_PSI_URL = "https://psi.nasa.gov/physci/repo/data/investigations/PSI-102"
 
 GIF_CANDIDATES = [
-    ASSETS_DIR / "ember.gif",
-    ASSETS_DIR / "ember.gif",
-    ASSETS_DIR / "ember.gif",
-    BASE_DIR / "ember.gif",
-    BASE_DIR / "ember.gif",
-    BASE_DIR / "ember.gif",
+ASSETS_DIR / "ember.gif",
+ASSETS_DIR / "ember.gif",
+ASSETS_DIR / "ember.gif",
+BASE_DIR / "ember.gif",
+BASE_DIR / "ember.gif",
+BASE_DIR / "ember.gif",
 ]
 
 CSS = """
+
 <style>
 :root {
   --bg: #090909; --bg-soft: #111111; --card: #1A1A1A;
@@ -81,6 +82,8 @@ a.nav-item:hover { color: var(--text); }
 .visual { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 14px;
   box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 90px rgba(242,92,5,0.16); }
 .visual img { width: 100%; height: auto; display: block; border-radius: 14px; }
+.visual-credit { color: #777773; font-size: 0.7rem; line-height: 1.3; text-align: right;
+  padding: 8px 4px 0; letter-spacing: 0.02em; }
 .visual-empty { aspect-ratio: 16 / 9; border-radius: 14px; display: flex; align-items: center;
   justify-content: center; color: var(--muted); font-size: 0.85rem; text-align: center; padding: 20px;
   background: radial-gradient(circle at 60% 45%, rgba(242,92,5,0.14), #0d0d0d 65%); }
@@ -262,58 +265,55 @@ table.assess td strong { color: var(--text); }
   .detail-grid, .evidence-summary, .case-overview { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
+
 """
 
-
 def load_gif_html() -> str:
-    for path in GIF_CANDIDATES:
-        if path.is_file():
-            data = base64.b64encode(path.read_bytes()).decode()
-            return (
-                '<img src="data:image/gif;base64,'
-                f'{data}" alt="Animated visual of a sample burning">'
-            )
-    return (
-        '<div class="visual-empty">Visual not found. Place ember.gif.gif '
-        'inside the assets folder.</div>'
-    )
-
+for path in GIF_CANDIDATES:
+if path.is_file():
+data = base64.b64encode(path.read_bytes()).decode()
+return (
+'<img src="data:image/gif;base64,'
+             f'{data}" alt="Animated visual of a sample burning">'
+)
+return (
+'<div class="visual-empty">Visual not found. Place ember.gif.gif '
+'inside the assets folder.</div>'
+)
 
 def html(block: str) -> str:
-    return "\n".join(line.strip() for line in block.splitlines() if line.strip())
-
+return "\n".join(line.strip() for line in block.splitlines() if line.strip())
 
 def get_query_value(name: str, default: str = "") -> str:
-    value = st.query_params.get(name, default)
-    if isinstance(value, list):
-        return value[0] if value else default
-    return value
-
+value = st.query_params.get(name, default)
+if isinstance(value, list):
+return value[0] if value else default
+return value
 
 def render_nav(active_page: str) -> str:
-    home_class = "nav-item active" if active_page == "home" else "nav-item"
-    library_class = "nav-item active" if active_page == "library" else "nav-item"
-    explorer_class = "nav-item active" if active_page == "explorer" else "nav-item"
-    accidents_class = "nav-item active" if active_page == "accidents" else "nav-item"
-    datalab_class = "nav-item active" if active_page == "datalab" else "nav-item"
+home_class = "nav-item active" if active_page == "home" else "nav-item"
+library_class = "nav-item active" if active_page == "library" else "nav-item"
+explorer_class = "nav-item active" if active_page == "explorer" else "nav-item"
+accidents_class = "nav-item active" if active_page == "accidents" else "nav-item"
+datalab_class = "nav-item active" if active_page == "datalab" else "nav-item"
 
-    return html(
-        f"""
-        <div class="nav">
-          <span class="brand">Q’AQ’ Lab</span>
-          <div class="nav-links">
-            <a class="{home_class}" href="?page=home" target="_self">Home</a>
-            <a class="{library_class}" href="?page=library" target="_self">Library</a>
-            <a class="{explorer_class}" href="?page=explorer" target="_self">Experiment Explorer</a>
-            <a class="{accidents_class}" href="?page=accidents" target="_self">Accident Cases</a>
-            <a class="{datalab_class}" href="?page=datalab" target="_self">Data Lab</a>
-          </div>
-        </div>
-        """
-    )
-
+return html(
+    f"""
+    <div class="nav">
+      <span class="brand">Q’AQ’ Lab</span>
+      <div class="nav-links">
+        <a class="{home_class}" href="?page=home" target="_self">Home</a>
+        <a class="{library_class}" href="?page=library" target="_self">Library</a>
+        <a class="{explorer_class}" href="?page=explorer" target="_self">Experiment Explorer</a>
+        <a class="{accidents_class}" href="?page=accidents" target="_self">Accident Cases</a>
+        <a class="{datalab_class}" href="?page=datalab" target="_self">Data Lab</a>
+      </div>
+    </div>
+    """
+)
 
 hero = html(f"""
+
 <div class="hero">
   <div>
     <div class="eyebrow">EXPLAINABLE HYBRID SI · NASA PSI DATA</div>
@@ -324,2173 +324,2136 @@ hero = html(f"""
       <span class="scope-note">Case-based reasoning + scientific expert rules</span>
     </div>
   </div>
-  <div class="visual">{load_gif_html()}</div>
+  <div class="visual">
+    {load_gif_html()}
+    <div class="visual-credit">Image courtesy of NASA</div>
+  </div>
 </div>
 """)
 
 body = html(
-    """
-    <div class="about" id="about">
-      <h2>Find the NASA research that fits your experiment</h2>
-      <p>A chatbot can summarize a report. Q’AQ’ Lab helps you see which NASA studies are actually useful for the experiment you are planning. Enter your material, oxygen level, pressure, airflow, and gravity. The app finds tests with similar conditions, shows where they match or differ, links you to the original source, and points out questions the available data cannot answer yet.</p>
-    </div>
+"""
+<div class="about" id="about">
+<h2>Find the NASA research that fits your experiment</h2>
+<p>A chatbot can summarize a report. Q’AQ’ Lab helps you see which NASA studies are actually useful for the experiment you are planning. Enter your material, oxygen level, pressure, airflow, and gravity. The app finds tests with similar conditions, shows where they match or differ, links you to the original source, and points out questions the available data cannot answer yet.</p>
+</div>
 
-    <div class="section">
-      <h2>From a question to a defensible research action</h2>
-      <div class="grid4">
-        <div class="card accent">
-          <h3>Structured experiment</h3>
-          <p>Material, geometry, thickness, oxygen, pressure, gravity, airflow, and sample condition become one comparable research case.</p>
-        </div>
-        <div class="card accent">
-          <h3>Closest NASA cases</h3>
-          <p>Case-based reasoning orders real PSI tests by exact condition matches, missing information, and normalized multivariable distance.</p>
-        </div>
-        <div class="card accent">
-          <h3>Evidence boundary</h3>
-          <p>Scientific rules mark every condition as covered, partial, or outside the tested domain and prevent unsupported extrapolation.</p>
-        </div>
-        <div class="card accent">
-          <h3>Next experiment</h3>
-          <p>Every evidence gap becomes an actionable testing requirement, while the original NASA table, page, and caveats remain visible.</p>
-        </div>
-      </div>
+<div class="section">
+  <h2>From a question to a defensible research action</h2>
+  <div class="grid4">
+    <div class="card accent">
+      <h3>Structured experiment</h3>
+      <p>Material, geometry, thickness, oxygen, pressure, gravity, airflow, and sample condition become one comparable research case.</p>
     </div>
-
-    <div class="section">
-      <h2>How the explainable SI works</h2>
-      <div class="grid4">
-        <div class="card">
-          <div class="step-n">01</div>
-          <div class="step-t">Structure</div>
-          <p>Convert heterogeneous PSI findings into a consistent experimental schema.</p>
-        </div>
-        <div class="card">
-          <div class="step-n">02</div>
-          <div class="step-t">Retrieve</div>
-          <p>Find the most comparable experimental cases without hiding their differences.</p>
-        </div>
-        <div class="card">
-          <div class="step-n">03</div>
-          <div class="step-t">Reason</div>
-          <p>Apply transparent domain rules to distinguish direct evidence from extrapolation.</p>
-        </div>
-        <div class="card">
-          <div class="step-n">04</div>
-          <div class="step-t">Act or abstain</div>
-          <p>Return a traceable research action, or explicitly refuse a conclusion when evidence is insufficient.</p>
-        </div>
-      </div>
+    <div class="card accent">
+      <h3>Closest NASA cases</h3>
+      <p>Case-based reasoning orders real PSI tests by exact condition matches, missing information, and normalized multivariable distance.</p>
     </div>
-
-    <div class="section">
-      <h2>Working prototype</h2>
-      <div class="grid5">
-        <div class="card plan">
-          <span class="status on">Available</span>
-          <h3>Home</h3>
-          <p>Project purpose and scope.</p>
-        </div>
-        <div class="card plan">
-          <span class="status on">Available</span>
-          <h3>Library</h3>
-          <p>Browse PSI investigations and available sources.</p>
-        </div>
-        <div class="card plan">
-          <span class="status on">Available</span>
-          <h3>Experiment Explorer</h3>
-          <p>Route a research question and review supporting evidence.</p>
-        </div>
-        <div class="card plan">
-          <span class="status on">Available</span>
-          <h3>Accident Cases</h3>
-          <p>Review documented incidents, operational factors, and evidence limits.</p>
-        </div>
-        <div class="card plan">
-          <span class="status on">Available</span>
-          <h3>Data Lab</h3>
-          <p>Audit evidence coverage and convert unsupported conditions into the next required test.</p>
-        </div>
-      </div>
+    <div class="card accent">
+      <h3>Evidence boundary</h3>
+      <p>Scientific rules mark every condition as covered, partial, or outside the tested domain and prevent unsupported extrapolation.</p>
     </div>
-
-    <div class="scope">
-      <h2>Same conditions, same audit trail</h2>
-      <p>Q’AQ’ Lab’s scientific conclusion does not depend on how a prompt is phrased. The current prototype is deterministic, source-linked, and designed to say “insufficient evidence” instead of manufacturing certainty.</p>
+    <div class="card accent">
+      <h3>Next experiment</h3>
+      <p>Every evidence gap becomes an actionable testing requirement, while the original NASA table, page, and caveats remain visible.</p>
     </div>
+  </div>
+</div>
 
-    <div class="footer">Q’AQ’ Lab — From NASA data to a defensible experiment.</div>
-    """
+<div class="section">
+  <h2>How the explainable SI works</h2>
+  <div class="grid4">
+    <div class="card">
+      <div class="step-n">01</div>
+      <div class="step-t">Structure</div>
+      <p>Convert heterogeneous PSI findings into a consistent experimental schema.</p>
+    </div>
+    <div class="card">
+      <div class="step-n">02</div>
+      <div class="step-t">Retrieve</div>
+      <p>Find the most comparable experimental cases without hiding their differences.</p>
+    </div>
+    <div class="card">
+      <div class="step-n">03</div>
+      <div class="step-t">Reason</div>
+      <p>Apply transparent domain rules to distinguish direct evidence from extrapolation.</p>
+    </div>
+    <div class="card">
+      <div class="step-n">04</div>
+      <div class="step-t">Act or abstain</div>
+      <p>Return a traceable research action, or explicitly refuse a conclusion when evidence is insufficient.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Working prototype</h2>
+  <div class="grid5">
+    <div class="card plan">
+      <span class="status on">Available</span>
+      <h3>Home</h3>
+      <p>Project purpose and scope.</p>
+    </div>
+    <div class="card plan">
+      <span class="status on">Available</span>
+      <h3>Library</h3>
+      <p>Browse PSI investigations and available sources.</p>
+    </div>
+    <div class="card plan">
+      <span class="status on">Available</span>
+      <h3>Experiment Explorer</h3>
+      <p>Route a research question and review supporting evidence.</p>
+    </div>
+    <div class="card plan">
+      <span class="status on">Available</span>
+      <h3>Accident Cases</h3>
+      <p>Review documented incidents, operational factors, and evidence limits.</p>
+    </div>
+    <div class="card plan">
+      <span class="status on">Available</span>
+      <h3>Data Lab</h3>
+      <p>Audit evidence coverage and convert unsupported conditions into the next required test.</p>
+    </div>
+  </div>
+</div>
+
+<div class="scope">
+  <h2>Same conditions, same audit trail</h2>
+  <p>Q’AQ’ Lab’s scientific conclusion does not depend on how a prompt is phrased. The current prototype is deterministic, source-linked, and designed to say “insufficient evidence” instead of manufacturing certainty.</p>
+</div>
+
+<div class="footer">Q’AQ’ Lab — From NASA data to a defensible experiment.</div>
+"""
+
 )
-
 
 @st.cache_data(show_spinner=False)
 def load_investigations() -> pd.DataFrame:
-    if not INVESTIGATIONS_PATH.is_file():
-        raise FileNotFoundError(
-            f"Missing file: {INVESTIGATIONS_PATH}. "
-            "Place investigations.csv inside the data folder."
-        )
+if not INVESTIGATIONS_PATH.is_file():
+raise FileNotFoundError(
+f"Missing file: {INVESTIGATIONS_PATH}. "
+"Place investigations.csv inside the data folder."
+)
 
-    dataframe = pd.read_csv(INVESTIGATIONS_PATH).fillna("")
+dataframe = pd.read_csv(INVESTIGATIONS_PATH).fillna("")
 
-    required_columns = {
-        "psi_id",
-        "acronym",
-        "title",
-        "research_area",
-        "subresearch_area",
-        "project_type",
-        "nasa_center",
-        "objective_short",
-        "available_resources",
-        "experimental_table_status",
-        "ember_status",
-        "ember_record_count",
-        "source_url",
-    }
+required_columns = {
+    "psi_id",
+    "acronym",
+    "title",
+    "research_area",
+    "subresearch_area",
+    "project_type",
+    "nasa_center",
+    "objective_short",
+    "available_resources",
+    "experimental_table_status",
+    "ember_status",
+    "ember_record_count",
+    "source_url",
+}
 
-    missing_columns = required_columns.difference(dataframe.columns)
-    if missing_columns:
-        missing_text = ", ".join(sorted(missing_columns))
-        raise ValueError(f"Missing columns in investigations.csv: {missing_text}")
+missing_columns = required_columns.difference(dataframe.columns)
+if missing_columns:
+    missing_text = ", ".join(sorted(missing_columns))
+    raise ValueError(f"Missing columns in investigations.csv: {missing_text}")
 
-    optional_defaults = {
-        "flight_platform": "",
-        "start_date": "",
-        "end_date": "",
-        "doi": "",
-        "license": "",
-        "modeling_table_status": "Not reviewed",
-        "related_investigations": "",
-    }
+optional_defaults = {
+    "flight_platform": "",
+    "start_date": "",
+    "end_date": "",
+    "doi": "",
+    "license": "",
+    "modeling_table_status": "Not reviewed",
+    "related_investigations": "",
+}
 
-    for column, default_value in optional_defaults.items():
-        if column not in dataframe.columns:
-            dataframe[column] = default_value
+for column, default_value in optional_defaults.items():
+    if column not in dataframe.columns:
+        dataframe[column] = default_value
 
-    dataframe["ember_record_count"] = (
-        pd.to_numeric(dataframe["ember_record_count"], errors="coerce")
-        .fillna(0)
-        .astype(int)
-    )
+dataframe["ember_record_count"] = (
+    pd.to_numeric(dataframe["ember_record_count"], errors="coerce")
+    .fillna(0)
+    .astype(int)
+)
 
-    return dataframe
-
+return dataframe
 
 @st.cache_data(show_spinner=False)
 def load_bassii_tests() -> pd.DataFrame:
-    if not BASSII_TESTS_PATH.is_file():
-        raise FileNotFoundError(
-            f"Missing file: {BASSII_TESTS_PATH}. "
-            "Place bassii_sibal_tests_EN.csv inside the data folder."
-        )
+if not BASSII_TESTS_PATH.is_file():
+raise FileNotFoundError(
+f"Missing file: {BASSII_TESTS_PATH}. "
+"Place bassii_sibal_tests_EN.csv inside the data folder."
+)
 
-    dataframe = pd.read_csv(BASSII_TESTS_PATH)
+dataframe = pd.read_csv(BASSII_TESTS_PATH)
 
-    required_columns = {
-        "test_id",
-        "investigation",
-        "material",
-        "sample_width_cm",
-        "airflow_start_cm_s",
-        "airflow_end_cm_s",
-        "airflow_profile",
-        "oxygen_vol_pct",
-        "reused_sample",
-        "observed_outcome",
-        "ignited_explicit",
-        "exclusion_reason",
-        "source_page",
-        "source_table",
-    }
+required_columns = {
+    "test_id",
+    "investigation",
+    "material",
+    "sample_width_cm",
+    "airflow_start_cm_s",
+    "airflow_end_cm_s",
+    "airflow_profile",
+    "oxygen_vol_pct",
+    "reused_sample",
+    "observed_outcome",
+    "ignited_explicit",
+    "exclusion_reason",
+    "source_page",
+    "source_table",
+}
 
-    missing_columns = required_columns.difference(dataframe.columns)
-    if missing_columns:
-        missing_text = ", ".join(sorted(missing_columns))
-        raise ValueError(
-            f"Missing columns in bassii_sibal_tests_EN.csv: {missing_text}"
-        )
+missing_columns = required_columns.difference(dataframe.columns)
+if missing_columns:
+    missing_text = ", ".join(sorted(missing_columns))
+    raise ValueError(
+        f"Missing columns in bassii_sibal_tests_EN.csv: {missing_text}"
+    )
 
-    numeric_columns = [
-        "sample_width_cm",
-        "airflow_start_cm_s",
-        "airflow_end_cm_s",
-        "oxygen_vol_pct",
-    ]
-    for column in numeric_columns:
-        dataframe[column] = pd.to_numeric(
-            dataframe[column], errors="coerce"
-        )
+numeric_columns = [
+    "sample_width_cm",
+    "airflow_start_cm_s",
+    "airflow_end_cm_s",
+    "oxygen_vol_pct",
+]
+for column in numeric_columns:
+    dataframe[column] = pd.to_numeric(
+        dataframe[column], errors="coerce"
+    )
 
-    text_columns = [
-        "test_id",
-        "investigation",
-        "material",
-        "airflow_profile",
-        "reused_sample",
-        "observed_outcome",
-        "ignited_explicit",
-        "exclusion_reason",
-        "source_table",
-    ]
-    for column in text_columns:
-        dataframe[column] = dataframe[column].fillna("").astype(str)
+text_columns = [
+    "test_id",
+    "investigation",
+    "material",
+    "airflow_profile",
+    "reused_sample",
+    "observed_outcome",
+    "ignited_explicit",
+    "exclusion_reason",
+    "source_table",
+]
+for column in text_columns:
+    dataframe[column] = dataframe[column].fillna("").astype(str)
 
-    return dataframe
-
+return dataframe
 
 @st.cache_data(show_spinner=False)
 def load_accident_cases() -> pd.DataFrame:
-    if not ACCIDENT_CASES_PATH.is_file():
-        raise FileNotFoundError(
-            f"Missing file: {ACCIDENT_CASES_PATH}. "
-            "Place accident_cases.csv inside the data folder."
-        )
+if not ACCIDENT_CASES_PATH.is_file():
+raise FileNotFoundError(
+f"Missing file: {ACCIDENT_CASES_PATH}. "
+"Place accident_cases.csv inside the data folder."
+)
 
-    dataframe = pd.read_csv(
-        ACCIDENT_CASES_PATH,
-        keep_default_na=False,
+dataframe = pd.read_csv(
+    ACCIDENT_CASES_PATH,
+    keep_default_na=False,
+)
+
+required_columns = {
+    "case_id",
+    "title",
+    "event_date",
+    "setting",
+    "event_type",
+    "crew_affected",
+    "outcome",
+    "initiating_event",
+    "contributing_factors",
+    "operational_consequences",
+    "response_actions",
+    "research_focus",
+    "related_psi",
+    "relationship_type",
+    "psi_relation_note",
+    "evidence_level",
+    "interpretation_limit",
+    "source_title",
+    "source_url",
+}
+
+missing_columns = required_columns.difference(dataframe.columns)
+if missing_columns:
+    missing_text = ", ".join(sorted(missing_columns))
+    raise ValueError(
+        f"Missing columns in accident_cases.csv: {missing_text}"
     )
 
-    required_columns = {
-        "case_id",
+dataframe["crew_affected"] = (
+    pd.to_numeric(dataframe["crew_affected"], errors="coerce")
+    .fillna(0)
+    .astype(int)
+)
+
+return dataframe
+
+def split_pipe_values(value: object) -> list[str]:
+return [
+item.strip()
+for item in str(value).split("|")
+if item.strip()
+]
+
+FIELD_METADATA = {
+"oxygen_vol_pct": {
+"label": "Oxygen concentration",
+"unit": "vol. %",
+"kind": "numeric",
+},
+"airflow_start_cm_s": {
+"label": "Initial airflow",
+"unit": "cm/s",
+"kind": "numeric",
+},
+"airflow_end_cm_s": {
+"label": "Final airflow",
+"unit": "cm/s",
+"kind": "numeric",
+},
+"sample_width_cm": {
+"label": "Sample width",
+"unit": "cm",
+"kind": "numeric",
+},
+"airflow_profile": {
+"label": "Airflow profile",
+"unit": "",
+"kind": "categorical",
+},
+"reused_sample": {
+"label": "Sample condition",
+"unit": "",
+"kind": "categorical",
+},
+"ignited_explicit": {
+"label": "Explicit ignition",
+"unit": "",
+"kind": "categorical",
+},
+"observed_outcome": {
+"label": "Documented outcome",
+"unit": "",
+"kind": "categorical",
+},
+}
+
+def display_condition_value(field: str, value: object) -> str:
+if pd.isna(value) or str(value).strip() == "":
+return "Not reported"
+
+if field == "reused_sample":
+    return "Reused sample" if str(value) == "Yes" else "New sample"
+
+metadata = FIELD_METADATA[field]
+if metadata["kind"] == "numeric":
+    number = float(value)
+    formatted = f"{number:.2f}".rstrip("0").rstrip(".")
+    unit = metadata["unit"]
+    return f"{formatted} {unit}".strip()
+
+return str(value)
+
+def values_match(field: str, row_value: object, query_value: object) -> bool:
+metadata = FIELD_METADATA[field]
+if pd.isna(row_value) or str(row_value).strip() == "":
+return False
+
+if metadata["kind"] == "numeric":
+    return abs(float(row_value) - float(query_value)) < 1e-9
+
+return str(row_value).casefold() == str(query_value).casefold()
+
+def outside_numeric_conditions(
+dataframe: pd.DataFrame,
+query: dict[str, object],
+) -> list[str]:
+outside = []
+for field, query_value in query.items():
+metadata = FIELD_METADATA[field]
+if metadata["kind"] != "numeric":
+continue
+
+    available = dataframe[field].dropna()
+    if available.empty:
+        outside.append(metadata["label"])
+        continue
+
+    minimum = float(available.min())
+    maximum = float(available.max())
+    value = float(query_value)
+    if value < minimum or value > maximum:
+        outside.append(
+            f"{metadata['label']} {display_condition_value(field, value)} "
+            f"(available range: {display_condition_value(field, minimum)} to "
+            f"{display_condition_value(field, maximum)})"
+        )
+
+return outside
+
+def rank_evidence_records(
+dataframe: pd.DataFrame,
+query: dict[str, object],
+) -> pd.DataFrame:
+ranked = dataframe.copy()
+exact_counts = pd.Series(0, index=ranked.index, dtype="int64")
+missing_counts = pd.Series(0, index=ranked.index, dtype="int64")
+distances = pd.Series(0.0, index=ranked.index, dtype="float64")
+
+for field, query_value in query.items():
+    metadata = FIELD_METADATA[field]
+    missing = ranked[field].isna() | (
+        ranked[field].astype(str).str.strip() == ""
+    )
+    missing_counts += missing.astype(int)
+
+    if metadata["kind"] == "numeric":
+        available = ranked[field].dropna()
+        field_range = float(available.max() - available.min())
+        if field_range == 0:
+            field_range = 1.0
+
+        differences = (
+            ranked[field].astype(float) - float(query_value)
+        ).abs()
+        exact_counts += (differences < 1e-9).astype(int)
+        distances += differences.fillna(field_range) / field_range
+    else:
+        matches = (
+            ranked[field].astype(str).str.casefold()
+            == str(query_value).casefold()
+        ) & ~missing
+        exact_counts += matches.astype(int)
+        distances += (~matches).astype(float)
+
+ranked["_exact_condition_count"] = exact_counts
+ranked["_missing_condition_count"] = missing_counts
+ranked["_distance"] = distances / max(len(query), 1)
+
+return ranked.sort_values(
+    by=[
+        "_exact_condition_count",
+        "_missing_condition_count",
+        "_distance",
+        "test_id",
+    ],
+    ascending=[False, True, True, True],
+)
+
+def match_evidence(
+dataframe: pd.DataFrame,
+query: dict[str, object],
+) -> dict[str, object]:
+if not query:
+return {
+"status": "empty",
+"records": dataframe.iloc[0:0],
+"outside": [],
+"direct_count": 0,
+}
+
+exact_mask = pd.Series(True, index=dataframe.index)
+for field, query_value in query.items():
+    exact_mask &= dataframe[field].apply(
+        lambda row_value: values_match(field, row_value, query_value)
+    )
+
+direct = dataframe[exact_mask].copy()
+if not direct.empty:
+    return {
+        "status": "direct",
+        "records": direct.sort_values("test_id"),
+        "outside": [],
+        "direct_count": len(direct),
+    }
+
+outside = outside_numeric_conditions(dataframe, query)
+ranked = rank_evidence_records(dataframe, query).head(1)
+return {
+    "status": "outside" if outside else "partial",
+    "records": ranked,
+    "outside": outside,
+    "direct_count": 0,
+}
+
+def compare_record_to_query(
+row: pd.Series,
+query: dict[str, object],
+) -> tuple[list[str], list[str]]:
+matched = []
+different = []
+
+for field, query_value in query.items():
+    metadata = FIELD_METADATA[field]
+    row_value = row[field]
+    if values_match(field, row_value, query_value):
+        matched.append(
+            f"{metadata['label']}: "
+            f"{display_condition_value(field, row_value)}"
+        )
+    else:
+        different.append(
+            f"{metadata['label']}: requested "
+            f"{display_condition_value(field, query_value)}; "
+            f"test reports {display_condition_value(field, row_value)}"
+        )
+
+return matched, different
+
+def resource_tags(resources_text: str) -> str:
+resources = [
+item.strip()
+for item in str(resources_text).split("|")
+if item.strip()
+]
+return "".join(
+f'<span class="resource-tag">{escape(resource)}</span>'
+for resource in resources
+)
+
+def investigation_card(row: pd.Series) -> str:
+record_count = int(row["ember_record_count"])
+if record_count > 0:
+coverage = f"{record_count} structured records available in Q’AQ’ Lab"
+else:
+coverage = escape(str(row["ember_status"]))
+
+identifier = str(row["psi_id"])
+if str(row["acronym"]).strip():
+    identifier = f"{identifier} · {row['acronym']}"
+
+detail_id = escape(str(row["psi_id"]), quote=True)
+source_url = escape(str(row["source_url"]), quote=True)
+
+return f"""
+<div class="investigation-card">
+  <div class="psi-id">{escape(identifier)}</div>
+  <h3>{escape(str(row['title']))}</h3>
+  <div class="card-meta">
+    {escape(str(row['research_area']))}<br>
+    {escape(str(row['subresearch_area']))}<br>
+    {escape(str(row['project_type']))}<br>
+    {escape(str(row['nasa_center']))}
+  </div>
+  <p>{escape(str(row['objective_short']))}</p>
+  <div class="resource-list">{resource_tags(row['available_resources'])}</div>
+  <p>Experimental table: {escape(str(row['experimental_table_status']))}</p>
+  <div class="coverage">Q’AQ’ Lab coverage: {coverage}</div>
+  <div class="card-actions">
+    <a class="source-link" href="?page=library&amp;psi={detail_id}" target="_self">View investigation</a>
+    <a class="source-link secondary" href="{source_url}" target="_blank" rel="noopener noreferrer">Open in NASA PSI</a>
+  </div>
+</div>
+"""
+
+def detail_item(label: str, value: str) -> str:
+shown_value = value if str(value).strip() else "Not reported"
+return f"""
+<div class="detail-item">
+<div class="detail-label">{escape(label)}</div>
+<div class="detail-value">{escape(str(shown_value))}</div>
+</div>
+"""
+
+def render_investigation_detail(row: pd.Series) -> None:
+record_count = int(row["ember_record_count"])
+coverage = (
+f"{record_count} structured records available in Q’AQ’ Lab"
+if record_count > 0
+else str(row["ember_status"])
+)
+
+details = "".join(
+    [
+        detail_item("Research area", row["research_area"]),
+        detail_item("Subresearch area", row["subresearch_area"]),
+        detail_item("Project type", row["project_type"]),
+        detail_item("Flight platform", row["flight_platform"]),
+        detail_item("NASA center", row["nasa_center"]),
+        detail_item("DOI", row["doi"]),
+        detail_item("Start date", row["start_date"]),
+        detail_item("End date", row["end_date"]),
+        detail_item("License", row["license"]),
+    ]
+)
+
+source_url = escape(str(row["source_url"]), quote=True)
+
+identifier = str(row["psi_id"])
+if str(row["acronym"]).strip():
+    identifier = f"{identifier} · {row['acronym']}"
+
+panel = f"""
+<a class="detail-back" href="?page=library" target="_self">Back to Library</a>
+<div class="detail-panel">
+  <div class="psi-id">{escape(identifier)}</div>
+  <h1>{escape(str(row['title']))}</h1>
+  <div class="detail-grid">{details}</div>
+  <h2>Research objective</h2>
+  <p>{escape(str(row['objective_short']))}</p>
+  <h2>Available resources</h2>
+  <div class="resource-list">{resource_tags(row['available_resources'])}</div>
+  <h2>Data availability</h2>
+  <p>Experimental table: {escape(str(row['experimental_table_status']))}</p>
+  <p>Modeling table: {escape(str(row['modeling_table_status']))}</p>
+  <p>Structured records in Q’AQ’ Lab: {escape(coverage)}</p>
+  <h2>Related investigations</h2>
+  <p>{escape(str(row['related_investigations']) or 'Not reported')}</p>
+  <div class="card-actions">
+    <a class="source-link" href="{source_url}" target="_blank" rel="noopener noreferrer">Open in NASA PSI</a>
+  </div>
+</div>
+"""
+
+st.markdown(f'<div class="em">{panel}</div>', unsafe_allow_html=True)
+
+def render_home() -> None:
+nav = render_nav("home")
+st.markdown(
+f'<div class="em">{nav}{hero}{body}</div>',
+unsafe_allow_html=True,
+)
+
+def render_library() -> None:
+nav = render_nav("library")
+header = html(
+"""
+<div class="library-header">
+<div class="eyebrow">NASA PHYSICAL SCIENCES INFORMATICS</div>
+<h1>PSI Research Library</h1>
+<p>Browse selected NASA PSI investigations and review the evidence available for each project. Q’AQ’ Lab distinguishes between investigation metadata, reports, analyzed data, publications, and structured experimental records.</p>
+</div>
+"""
+)
+
+st.markdown(
+    f'<div class="em">{nav}{header}</div>',
+    unsafe_allow_html=True,
+)
+
+try:
+    investigations = load_investigations()
+except (FileNotFoundError, ValueError) as error:
+    st.error(str(error))
+    return
+
+selected_psi = get_query_value("psi", "").strip()
+if selected_psi:
+    selected_rows = investigations[
+        investigations["psi_id"].astype(str).str.casefold()
+        == selected_psi.casefold()
+    ]
+    if selected_rows.empty:
+        st.warning("The selected investigation was not found in the catalog.")
+    else:
+        render_investigation_detail(selected_rows.iloc[0])
+        return
+
+search_column, area_column, type_column = st.columns([2, 1, 1])
+
+with search_column:
+    search = st.text_input(
+        "Search",
+        placeholder="Search by PSI ID, acronym, or title",
+    )
+
+areas = [
+    "All",
+    *sorted(
+        value
+        for value in investigations["research_area"].unique()
+        if value
+    ),
+]
+
+project_types = [
+    "All",
+    *sorted(
+        value
+        for value in investigations["project_type"].unique()
+        if value
+    ),
+]
+
+with area_column:
+    selected_area = st.selectbox("Research area", areas)
+
+with type_column:
+    selected_type = st.selectbox("Project type", project_types)
+
+resource_options = sorted(
+    {
+        resource.strip()
+        for resource_text in investigations["available_resources"]
+        for resource in str(resource_text).split("|")
+        if resource.strip()
+    }
+)
+
+resources_column, coverage_column = st.columns([2, 1])
+
+with resources_column:
+    selected_resources = st.multiselect(
+        "Available resources",
+        resource_options,
+    )
+
+with coverage_column:
+    selected_coverage = st.selectbox(
+        "Structured records in Q’AQ’ Lab",
+        ["All", "Available", "Not yet curated"],
+    )
+
+filtered = investigations.copy()
+
+if search:
+    searchable = (
+        filtered[["psi_id", "acronym", "title"]]
+        .astype(str)
+        .agg(" ".join, axis=1)
+    )
+    filtered = filtered[
+        searchable.str.contains(search, case=False, regex=False)
+    ]
+
+if selected_area != "All":
+    filtered = filtered[filtered["research_area"] == selected_area]
+
+if selected_type != "All":
+    filtered = filtered[filtered["project_type"] == selected_type]
+
+if selected_resources:
+    filtered = filtered[
+        filtered["available_resources"].apply(
+            lambda value: all(
+                resource
+                in {
+                    item.strip()
+                    for item in str(value).split("|")
+                    if item.strip()
+                }
+                for resource in selected_resources
+            )
+        )
+    ]
+
+if selected_coverage == "Available":
+    filtered = filtered[filtered["ember_record_count"] > 0]
+elif selected_coverage == "Not yet curated":
+    filtered = filtered[filtered["ember_record_count"] == 0]
+
+st.markdown(
+    f'<div class="results-count">{len(filtered)} investigations found</div>',
+    unsafe_allow_html=True,
+)
+
+if filtered.empty:
+    st.info("No investigations match the selected filters.")
+    return
+
+card_columns = st.columns(2)
+for position, (_, row) in enumerate(filtered.iterrows()):
+    with card_columns[position % 2]:
+        st.markdown(
+            investigation_card(row),
+            unsafe_allow_html=True,
+        )
+
+st.markdown(
+    '<div class="footer">Q’AQ’ Lab — Experimental evidence organized for research.</div>',
+    unsafe_allow_html=True,
+)
+
+def evidence_summary(
+routed_to: str,
+status_label: str,
+status_class: str,
+reviewed: str,
+found: str,
+) -> str:
+return html(f"""
+<div class="evidence-summary">
+<div class="summary-item">
+<div class="summary-label">Routed to</div>
+<div class="summary-value">{escape(routed_to)}</div>
+</div>
+<div class="summary-item">
+<div class="summary-label">Evidence coverage</div>
+<div class="summary-value"><span class="coverage-badge {status_class}">{escape(status_label)}</span></div>
+</div>
+<div class="summary-item">
+<div class="summary-label">Records reviewed</div>
+<div class="summary-value">{escape(reviewed)}</div>
+</div>
+<div class="summary-item">
+<div class="summary-label">Evidence found</div>
+<div class="summary-value">{escape(found)}</div>
+</div>
+</div>
+""")
+
+def match_card(
+row: pd.Series,
+query: dict[str, object],
+) -> str:
+matched, different = compare_record_to_query(row, query)
+matched_text = "<br>".join(escape(item) for item in matched)
+different_text = "<br>".join(escape(item) for item in different)
+
+why_parts = []
+if matched:
+    why_parts.append(
+        f"<strong>Matched conditions:</strong><br>{matched_text}"
+    )
+if different:
+    why_parts.append(
+        f"<strong>Different conditions:</strong><br>{different_text}"
+    )
+why_html = "<br><br>".join(why_parts)
+
+airflow_start = display_condition_value(
+    "airflow_start_cm_s", row["airflow_start_cm_s"]
+)
+airflow_end = display_condition_value(
+    "airflow_end_cm_s", row["airflow_end_cm_s"]
+)
+oxygen = display_condition_value(
+    "oxygen_vol_pct", row["oxygen_vol_pct"]
+)
+width = display_condition_value(
+    "sample_width_cm", row["sample_width_cm"]
+)
+sample_condition = display_condition_value(
+    "reused_sample", row["reused_sample"]
+)
+
+source_page = row["source_page"]
+if pd.notna(source_page):
+    try:
+        source_page = str(int(float(source_page)))
+    except (TypeError, ValueError):
+        source_page = str(source_page)
+else:
+    source_page = "Not reported"
+
+limitation = str(row["exclusion_reason"]).strip()
+if not limitation:
+    limitation = "No record-specific limitation was reported in the curated table."
+
+return html(f"""
+<div class="match-card">
+  <div class="psi-id">{escape(str(row['test_id']))} · BASS-II</div>
+  <h3>{escape(str(row['material']))}</h3>
+  <div class="condition-chips">
+    <span class="condition-chip">O₂ {escape(oxygen)}</span>
+    <span class="condition-chip">Airflow {escape(airflow_start)} → {escape(airflow_end)}</span>
+    <span class="condition-chip">{escape(str(row['airflow_profile']))} profile</span>
+    <span class="condition-chip">Width {escape(width)}</span>
+    <span class="condition-chip">{escape(sample_condition)}</span>
+  </div>
+  <p><strong>Documented outcome:</strong> {escape(str(row['observed_outcome']))}</p>
+  <p><strong>Explicit ignition:</strong> {escape(str(row['ignited_explicit']))}</p>
+  <p class="why">{why_html}</p>
+  <p><strong>Source:</strong> NASA/TM-20210011385 · {escape(str(row['source_table']))} · p. {escape(source_page)}</p>
+  <p class="limitation">{escape(limitation)} This observed outcome is not a fire-risk probability or a universal safety threshold.</p>
+  <div class="card-actions">
+    <a class="source-link" href="{BASSII_REPORT_URL}" target="_blank" rel="noopener noreferrer">Open source report</a>
+  </div>
+</div>
+""")
+
+def render_flame_results(
+tests: pd.DataFrame,
+query: dict[str, object],
+) -> None:
+result = match_evidence(tests, query)
+status = str(result["status"])
+records = result["records"]
+
+if status == "direct":
+    status_label = "Direct record evidence"
+    status_class = "direct"
+    found = f"{len(records)} matching record" + (
+        "" if len(records) == 1 else "s"
+    )
+    explanation = (
+        "At least one BASS-II/SIBAL record matches every condition "
+        "selected in the submitted question. The result describes "
+        "documented tests; it does not predict an untested scenario."
+    )
+    shown_records = records.head(6)
+elif status == "partial":
+    status_label = "Partial record evidence"
+    status_class = "partial"
+    found = "1 closest documented record"
+    explanation = (
+        "The selected values fall within the general range represented "
+        "by the prototype, but no single record combines every condition. "
+        "The closest record is shown below and each difference is "
+        "identified explicitly."
+    )
+    shown_records = records
+else:
+    status_label = "Outside current coverage"
+    status_class = "outside"
+    found = "1 closest record for reference"
+    outside_text = "; ".join(result["outside"])
+    explanation = (
+        "No structured record in this prototype supports all selected "
+        f"conditions. Outside coverage: {outside_text}. The closest "
+        "record is shown only to identify the current evidence boundary, "
+        "not to extrapolate an outcome."
+    )
+    shown_records = records
+
+summary = evidence_summary(
+    "BASS-II / SIBAL",
+    status_label,
+    status_class,
+    str(len(tests)),
+    found,
+)
+explanation_panel = html(f"""
+<div class="result-explanation">
+  <h3>Why this result</h3>
+  <p>{escape(explanation)}</p>
+</div>
+""")
+
+st.markdown(
+    f'<div class="em">{summary}{explanation_panel}</div>',
+    unsafe_allow_html=True,
+)
+
+for _, row in shown_records.iterrows():
+    st.markdown(
+        f'<div class="em">{match_card(row, query)}</div>',
+        unsafe_allow_html=True,
+    )
+
+if status == "direct" and len(records) > len(shown_records):
+    st.caption(
+        f"{len(records) - len(shown_records)} additional direct matches "
+        "are not displayed in this compact prototype view."
+    )
+
+def render_same_results(request: dict[str, object]) -> None:
+focus = str(request.get("focus", "Smoke particle behavior"))
+material = str(request.get("material", "Any documented material"))
+
+summary = evidence_summary(
+    "SAME · PSI-102",
+    "Documentary evidence only",
+    "documentary",
+    "Investigation metadata and reports",
+    "1 relevant investigation",
+)
+
+panel = html(f"""
+<div class="result-explanation">
+  <h3>Why this result</h3>
+  <p>SAME is relevant because the submitted question concerns {escape(focus.lower())}. The selected material is {escape(material)}. SAME examined smoke-particle behavior and spacecraft detector response under low-gravity conditions.</p>
+</div>
+<div class="documentary-panel">
+  <div class="psi-id">PSI-102 · SAME</div>
+  <h2>Smoke and Aerosol Measurement Experiment</h2>
+  <p><strong>Evidence level:</strong> Investigation metadata and report-level evidence.</p>
+  <p><strong>Current limitation:</strong> Structured SAME run records have not been curated in this prototype, so Q’AQ’ Lab does not claim a condition-level match or generate a detector-performance prediction.</p>
+  <p><strong>Related investigation:</strong> SAME-R · PSI-101.</p>
+  <div class="card-actions">
+    <a class="source-link" href="?page=library&amp;psi=PSI-102" target="_self">View Library record</a>
+    <a class="source-link secondary" href="{SAME_PSI_URL}" target="_blank" rel="noopener noreferrer">Open in NASA PSI</a>
+  </div>
+</div>
+""")
+
+st.markdown(
+    f'<div class="em">{summary}{panel}</div>',
+    unsafe_allow_html=True,
+)
+
+def render_experiment_explorer() -> None:
+nav = render_nav("explorer")
+
+try:
+    tests = load_bassii_tests()
+except (FileNotFoundError, ValueError) as error:
+    st.markdown(f'<div class="em">{nav}</div>', unsafe_allow_html=True)
+    st.error(str(error))
+    return
+
+oxygen_min = float(tests["oxygen_vol_pct"].min())
+oxygen_max = float(tests["oxygen_vol_pct"].max())
+airflow_min = float(tests["airflow_start_cm_s"].min())
+airflow_max = float(tests["airflow_start_cm_s"].max())
+
+header = html(f"""
+<div class="explorer-header">
+  <div class="eyebrow">EVIDENCE ROUTING AND COVERAGE</div>
+  <h1>Experiment Explorer</h1>
+  <p>Describe the evidence you need. Q’AQ’ Lab routes the question to the relevant PSI investigation and shows which conditions are directly represented, partially represented, or outside the current prototype.</p>
+  <div class="dataset-strip">
+    <span class="dataset-stat">{len(tests)} BASS-II / SIBAL records</span>
+    <span class="dataset-stat">O₂ {oxygen_min:.1f}–{oxygen_max:.1f} vol. %</span>
+    <span class="dataset-stat">Initial airflow {airflow_min:.1f}–{airflow_max:.1f} cm/s</span>
+    <span class="dataset-stat">SAME report routing</span>
+  </div>
+</div>
+<div class="question-intro">
+  <h2>Build a research question</h2>
+  <p>Select only the conditions that matter. Conditions left at Any are not used when comparing records.</p>
+</div>
+""")
+st.markdown(
+    f'<div class="em">{nav}{header}</div>',
+    unsafe_allow_html=True,
+)
+
+research_need = st.selectbox(
+    "Research need",
+    ["Flame behavior", "Smoke and detector response"],
+    key="explorer_research_need",
+)
+
+if research_need == "Flame behavior":
+    st.markdown(
+        """
+        <div class="em"><div class="fixed-condition">
+          <strong>Fixed prototype context:</strong> SIBAL fabric, microgravity aboard the ISS, 1 atm, concurrent flow. Only the selected fields below affect matching.
+        </div></div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    oxygen_column, initial_airflow_column = st.columns(2)
+    with oxygen_column:
+        use_oxygen = st.checkbox(
+            "Include oxygen concentration",
+            value=True,
+            key="explorer_use_oxygen",
+        )
+        oxygen_value = st.number_input(
+            "Oxygen concentration (vol. %)",
+            min_value=0.0,
+            max_value=100.0,
+            value=18.5,
+            step=0.1,
+            disabled=not use_oxygen,
+            key="explorer_oxygen",
+        )
+
+    with initial_airflow_column:
+        use_initial_airflow = st.checkbox(
+            "Include initial airflow",
+            value=True,
+            key="explorer_use_initial_airflow",
+        )
+        initial_airflow_value = st.number_input(
+            "Initial airflow (cm/s)",
+            min_value=0.0,
+            max_value=100.0,
+            value=10.0,
+            step=0.1,
+            disabled=not use_initial_airflow,
+            key="explorer_initial_airflow",
+        )
+
+    final_airflow_column, profile_column = st.columns(2)
+    with final_airflow_column:
+        use_final_airflow = st.checkbox(
+            "Include final airflow",
+            value=False,
+            key="explorer_use_final_airflow",
+        )
+        final_airflow_value = st.number_input(
+            "Final airflow (cm/s)",
+            min_value=0.0,
+            max_value=100.0,
+            value=10.0,
+            step=0.1,
+            disabled=not use_final_airflow,
+            key="explorer_final_airflow",
+        )
+
+    with profile_column:
+        profile_options = [
+            "Any",
+            *sorted(tests["airflow_profile"].dropna().unique()),
+        ]
+        airflow_profile = st.selectbox(
+            "Airflow profile",
+            profile_options,
+            key="explorer_profile",
+        )
+
+    width_column, sample_column = st.columns(2)
+    with width_column:
+        width_values = sorted(
+            float(value)
+            for value in tests["sample_width_cm"].dropna().unique()
+        )
+        width_labels = ["Any", *[f"{value:g} cm" for value in width_values]]
+        selected_width = st.selectbox(
+            "Sample width",
+            width_labels,
+            key="explorer_width",
+        )
+
+    with sample_column:
+        sample_condition = st.selectbox(
+            "Sample condition",
+            ["Any", "New sample", "Reused sample"],
+            key="explorer_sample_condition",
+        )
+
+    ignition_column, outcome_column = st.columns(2)
+    with ignition_column:
+        ignition = st.selectbox(
+            "Explicit ignition",
+            [
+                "Any",
+                *sorted(tests["ignited_explicit"].dropna().unique()),
+            ],
+            key="explorer_ignition",
+        )
+
+    with outcome_column:
+        outcome = st.selectbox(
+            "Documented outcome",
+            [
+                "Any",
+                *sorted(tests["observed_outcome"].dropna().unique()),
+            ],
+            key="explorer_outcome",
+        )
+
+    if st.button("Find supporting evidence", key="submit_flame_query"):
+        query: dict[str, object] = {}
+        if use_oxygen:
+            query["oxygen_vol_pct"] = float(oxygen_value)
+        if use_initial_airflow:
+            query["airflow_start_cm_s"] = float(initial_airflow_value)
+        if use_final_airflow:
+            query["airflow_end_cm_s"] = float(final_airflow_value)
+        if airflow_profile != "Any":
+            query["airflow_profile"] = airflow_profile
+        if selected_width != "Any":
+            query["sample_width_cm"] = float(
+                selected_width.replace(" cm", "")
+            )
+        if sample_condition != "Any":
+            query["reused_sample"] = (
+                "Yes" if sample_condition == "Reused sample" else "No"
+            )
+        if ignition != "Any":
+            query["ignited_explicit"] = ignition
+        if outcome != "Any":
+            query["observed_outcome"] = outcome
+
+        if query:
+            st.session_state["explorer_request"] = {
+                "need": "flame",
+                "query": query,
+            }
+        else:
+            st.warning("Select at least one condition before searching.")
+
+    submitted = st.session_state.get("explorer_request", {})
+    if submitted.get("need") == "flame":
+        render_flame_results(tests, submitted["query"])
+
+else:
+    st.markdown(
+        """
+        <div class="em"><div class="fixed-condition">
+          <strong>Current prototype coverage:</strong> SAME is connected at investigation and report level. Condition-level SAME records have not been curated.
+        </div></div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    focus_column, material_column = st.columns(2)
+    with focus_column:
+        smoke_focus = st.selectbox(
+            "Research focus",
+            [
+                "Smoke particle size",
+                "Smoke transport and aging",
+                "Smoke detector response",
+            ],
+            key="explorer_smoke_focus",
+        )
+
+    with material_column:
+        smoke_material = st.selectbox(
+            "Material of interest",
+            [
+                "Any documented material",
+                "Teflon",
+                "Kapton",
+                "Cellulose",
+                "Silicone rubber",
+                "Dibutyl phthalate",
+                "Pyrell (SAME-R)",
+            ],
+            key="explorer_smoke_material",
+        )
+
+    if st.button("Find supporting evidence", key="submit_smoke_query"):
+        st.session_state["explorer_request"] = {
+            "need": "smoke",
+            "focus": smoke_focus,
+            "material": smoke_material,
+        }
+
+    submitted = st.session_state.get("explorer_request", {})
+    if submitted.get("need") == "smoke":
+        render_same_results(submitted)
+
+st.markdown(
+    '<div class="footer">Q’AQ’ Lab — Evidence routing without unsupported prediction.</div>',
+    unsafe_allow_html=True,
+)
+
+def case_list(items: list[str]) -> str:
+return "".join(
+f'<div class="case-list-item">{escape(item)}</div>'
+for item in items
+)
+
+def accident_case_card(row: pd.Series) -> str:
+factors = split_pipe_values(row["contributing_factors"])
+consequences = split_pipe_values(row["operational_consequences"])
+responses = split_pipe_values(row["response_actions"])
+research_topics = split_pipe_values(row["research_focus"])
+
+topic_tags = "".join(
+    f'<span class="case-tag">{escape(topic)}</span>'
+    for topic in research_topics
+)
+
+related_psi = str(row["related_psi"]).strip()
+if related_psi == "BASS-II":
+    psi_link = (
+        '<a class="source-link" href="?page=library&amp;psi=PSI-25" '
+        'target="_self">View BASS-II in Library</a>'
+    )
+elif related_psi == "SAME":
+    psi_link = (
+        '<a class="source-link" href="?page=library&amp;psi=PSI-102" '
+        'target="_self">View SAME in Library</a>'
+    )
+else:
+    psi_link = ""
+
+source_url = escape(str(row["source_url"]), quote=True)
+event_date = escape(str(row["event_date"]))
+
+return html(f"""
+<div class="case-card">
+  <div class="psi-id">{escape(str(row['case_id']))} · {event_date}</div>
+  <h2>{escape(str(row['title']))}</h2>
+  <div class="case-meta">
+    <span class="case-tag">{escape(str(row['setting']))}</span>
+    <span class="case-tag">{escape(str(row['event_type']))}</span>
+    <span class="case-tag">{escape(str(row['evidence_level']))}</span>
+    {topic_tags}
+  </div>
+
+  <div class="case-overview">
+    <div class="case-overview-item">
+      <div class="detail-label">Initiating event</div>
+      <div class="detail-value">{escape(str(row['initiating_event']))}</div>
+    </div>
+    <div class="case-overview-item">
+      <div class="detail-label">People affected</div>
+      <div class="detail-value">{int(row['crew_affected'])}</div>
+    </div>
+    <div class="case-overview-item">
+      <div class="detail-label">Documented outcome</div>
+      <div class="detail-value">{escape(str(row['outcome']))}</div>
+    </div>
+  </div>
+
+  <div class="case-section">
+    <h3>Documented contributing factors</h3>
+    <div class="case-list">{case_list(factors)}</div>
+  </div>
+
+  <div class="case-section">
+    <h3>Operational consequences</h3>
+    <div class="case-list">{case_list(consequences)}</div>
+  </div>
+
+  <div class="case-section">
+    <h3>Response and recovery</h3>
+    <div class="case-list">{case_list(responses)}</div>
+  </div>
+
+  <div class="case-section psi-connection">
+    <h3>Connection to PSI evidence</h3>
+    <p><strong>{escape(str(row['relationship_type']))}</strong></p>
+    <p>{escape(str(row['psi_relation_note']))}</p>
+    <div class="card-actions">{psi_link}</div>
+  </div>
+
+  <div class="case-section">
+    <h3>Evidence boundary</h3>
+    <p class="evidence-boundary">{escape(str(row['interpretation_limit']))}</p>
+  </div>
+
+  <div class="card-actions">
+    <a class="source-link" href="{source_url}" target="_blank" rel="noopener noreferrer">Open official NASA source</a>
+  </div>
+</div>
+""")
+
+def render_accident_cases() -> None:
+nav = render_nav("accidents")
+
+try:
+    cases = load_accident_cases()
+except (FileNotFoundError, ValueError) as error:
+    st.markdown(f'<div class="em">{nav}</div>', unsafe_allow_html=True)
+    st.error(str(error))
+    return
+
+header = html(f"""
+<div class="cases-header">
+  <div class="eyebrow">DOCUMENTED OPERATIONAL CONTEXT</div>
+  <h1>Accident Cases</h1>
+  <p>Explore documented spacecraft incidents and ground-test failures. Q’AQ’ Lab separates historical facts, operational lessons, and experimental evidence so case narratives are not treated as probabilities or training labels.</p>
+  <div class="dataset-strip">
+    <span class="dataset-stat">{len(cases)} NASA-documented cases</span>
+    <span class="dataset-stat">Historical evidence</span>
+    <span class="dataset-stat">No accident probabilities</span>
+  </div>
+</div>
+<div class="question-intro">
+  <h2>Choose a research context</h2>
+  <p>Filter the cases by operational setting, research focus, or connection to PSI evidence.</p>
+</div>
+""")
+
+st.markdown(
+    f'<div class="em">{nav}{header}</div>',
+    unsafe_allow_html=True,
+)
+
+search_column, focus_column, setting_column = st.columns([1.4, 1, 1])
+
+with search_column:
+    search = st.text_input(
+        "Search cases",
+        placeholder="Search by case, event, factor, or response",
+        key="accident_search",
+    )
+
+focus_options = sorted(
+    {
+        topic
+        for value in cases["research_focus"]
+        for topic in split_pipe_values(value)
+    }
+)
+with focus_column:
+    selected_focus = st.selectbox(
+        "Research focus",
+        ["All", *focus_options],
+        key="accident_focus",
+    )
+
+with setting_column:
+    selected_setting = st.selectbox(
+        "Operational setting",
+        ["All", *sorted(cases["setting"].unique())],
+        key="accident_setting",
+    )
+
+selected_psi = st.selectbox(
+    "Related PSI evidence",
+    ["All", "BASS-II", "SAME", "No direct PSI match"],
+    key="accident_psi",
+)
+
+filtered = cases.copy()
+
+if search:
+    searchable_columns = [
         "title",
-        "event_date",
-        "setting",
         "event_type",
-        "crew_affected",
-        "outcome",
         "initiating_event",
         "contributing_factors",
         "operational_consequences",
         "response_actions",
         "research_focus",
-        "related_psi",
-        "relationship_type",
-        "psi_relation_note",
-        "evidence_level",
-        "interpretation_limit",
-        "source_title",
-        "source_url",
-    }
-
-    missing_columns = required_columns.difference(dataframe.columns)
-    if missing_columns:
-        missing_text = ", ".join(sorted(missing_columns))
-        raise ValueError(
-            f"Missing columns in accident_cases.csv: {missing_text}"
-        )
-
-    dataframe["crew_affected"] = (
-        pd.to_numeric(dataframe["crew_affected"], errors="coerce")
-        .fillna(0)
-        .astype(int)
+    ]
+    searchable = (
+        filtered[searchable_columns]
+        .astype(str)
+        .agg(" ".join, axis=1)
     )
-
-    return dataframe
-
-
-def split_pipe_values(value: object) -> list[str]:
-    return [
-        item.strip()
-        for item in str(value).split("|")
-        if item.strip()
+    filtered = filtered[
+        searchable.str.contains(search, case=False, regex=False)
     ]
 
+if selected_focus != "All":
+    filtered = filtered[
+        filtered["research_focus"].apply(
+            lambda value: selected_focus in split_pipe_values(value)
+        )
+    ]
 
-FIELD_METADATA = {
-    "oxygen_vol_pct": {
-        "label": "Oxygen concentration",
-        "unit": "vol. %",
-        "kind": "numeric",
-    },
-    "airflow_start_cm_s": {
-        "label": "Initial airflow",
-        "unit": "cm/s",
-        "kind": "numeric",
-    },
-    "airflow_end_cm_s": {
-        "label": "Final airflow",
-        "unit": "cm/s",
-        "kind": "numeric",
-    },
-    "sample_width_cm": {
-        "label": "Sample width",
-        "unit": "cm",
-        "kind": "numeric",
-    },
-    "airflow_profile": {
-        "label": "Airflow profile",
-        "unit": "",
-        "kind": "categorical",
-    },
-    "reused_sample": {
-        "label": "Sample condition",
-        "unit": "",
-        "kind": "categorical",
-    },
-    "ignited_explicit": {
-        "label": "Explicit ignition",
-        "unit": "",
-        "kind": "categorical",
-    },
-    "observed_outcome": {
-        "label": "Documented outcome",
-        "unit": "",
-        "kind": "categorical",
-    },
+if selected_setting != "All":
+    filtered = filtered[filtered["setting"] == selected_setting]
+
+if selected_psi == "No direct PSI match":
+    filtered = filtered[filtered["related_psi"].str.strip() == ""]
+elif selected_psi != "All":
+    filtered = filtered[filtered["related_psi"] == selected_psi]
+
+st.markdown(
+    f'<div class="case-count">{len(filtered)} relevant case' +
+    ('</div>' if len(filtered) == 1 else 's</div>'),
+    unsafe_allow_html=True,
+)
+
+if filtered.empty:
+    st.info("No documented cases match the selected context.")
+    return
+
+case_ids = filtered["case_id"].tolist()
+labels = {
+    row["case_id"]: f"{row['title']} · {row['event_date']}"
+    for _, row in filtered.iterrows()
 }
-
-
-def display_condition_value(field: str, value: object) -> str:
-    if pd.isna(value) or str(value).strip() == "":
-        return "Not reported"
-
-    if field == "reused_sample":
-        return "Reused sample" if str(value) == "Yes" else "New sample"
-
-    metadata = FIELD_METADATA[field]
-    if metadata["kind"] == "numeric":
-        number = float(value)
-        formatted = f"{number:.2f}".rstrip("0").rstrip(".")
-        unit = metadata["unit"]
-        return f"{formatted} {unit}".strip()
-
-    return str(value)
-
-
-def values_match(field: str, row_value: object, query_value: object) -> bool:
-    metadata = FIELD_METADATA[field]
-    if pd.isna(row_value) or str(row_value).strip() == "":
-        return False
-
-    if metadata["kind"] == "numeric":
-        return abs(float(row_value) - float(query_value)) < 1e-9
-
-    return str(row_value).casefold() == str(query_value).casefold()
-
-
-def outside_numeric_conditions(
-    dataframe: pd.DataFrame,
-    query: dict[str, object],
-) -> list[str]:
-    outside = []
-    for field, query_value in query.items():
-        metadata = FIELD_METADATA[field]
-        if metadata["kind"] != "numeric":
-            continue
-
-        available = dataframe[field].dropna()
-        if available.empty:
-            outside.append(metadata["label"])
-            continue
-
-        minimum = float(available.min())
-        maximum = float(available.max())
-        value = float(query_value)
-        if value < minimum or value > maximum:
-            outside.append(
-                f"{metadata['label']} {display_condition_value(field, value)} "
-                f"(available range: {display_condition_value(field, minimum)} to "
-                f"{display_condition_value(field, maximum)})"
-            )
-
-    return outside
-
-
-def rank_evidence_records(
-    dataframe: pd.DataFrame,
-    query: dict[str, object],
-) -> pd.DataFrame:
-    ranked = dataframe.copy()
-    exact_counts = pd.Series(0, index=ranked.index, dtype="int64")
-    missing_counts = pd.Series(0, index=ranked.index, dtype="int64")
-    distances = pd.Series(0.0, index=ranked.index, dtype="float64")
-
-    for field, query_value in query.items():
-        metadata = FIELD_METADATA[field]
-        missing = ranked[field].isna() | (
-            ranked[field].astype(str).str.strip() == ""
-        )
-        missing_counts += missing.astype(int)
-
-        if metadata["kind"] == "numeric":
-            available = ranked[field].dropna()
-            field_range = float(available.max() - available.min())
-            if field_range == 0:
-                field_range = 1.0
-
-            differences = (
-                ranked[field].astype(float) - float(query_value)
-            ).abs()
-            exact_counts += (differences < 1e-9).astype(int)
-            distances += differences.fillna(field_range) / field_range
-        else:
-            matches = (
-                ranked[field].astype(str).str.casefold()
-                == str(query_value).casefold()
-            ) & ~missing
-            exact_counts += matches.astype(int)
-            distances += (~matches).astype(float)
-
-    ranked["_exact_condition_count"] = exact_counts
-    ranked["_missing_condition_count"] = missing_counts
-    ranked["_distance"] = distances / max(len(query), 1)
-
-    return ranked.sort_values(
-        by=[
-            "_exact_condition_count",
-            "_missing_condition_count",
-            "_distance",
-            "test_id",
-        ],
-        ascending=[False, True, True, True],
-    )
-
-
-def match_evidence(
-    dataframe: pd.DataFrame,
-    query: dict[str, object],
-) -> dict[str, object]:
-    if not query:
-        return {
-            "status": "empty",
-            "records": dataframe.iloc[0:0],
-            "outside": [],
-            "direct_count": 0,
-        }
-
-    exact_mask = pd.Series(True, index=dataframe.index)
-    for field, query_value in query.items():
-        exact_mask &= dataframe[field].apply(
-            lambda row_value: values_match(field, row_value, query_value)
-        )
-
-    direct = dataframe[exact_mask].copy()
-    if not direct.empty:
-        return {
-            "status": "direct",
-            "records": direct.sort_values("test_id"),
-            "outside": [],
-            "direct_count": len(direct),
-        }
-
-    outside = outside_numeric_conditions(dataframe, query)
-    ranked = rank_evidence_records(dataframe, query).head(1)
-    return {
-        "status": "outside" if outside else "partial",
-        "records": ranked,
-        "outside": outside,
-        "direct_count": 0,
-    }
-
-
-def compare_record_to_query(
-    row: pd.Series,
-    query: dict[str, object],
-) -> tuple[list[str], list[str]]:
-    matched = []
-    different = []
-
-    for field, query_value in query.items():
-        metadata = FIELD_METADATA[field]
-        row_value = row[field]
-        if values_match(field, row_value, query_value):
-            matched.append(
-                f"{metadata['label']}: "
-                f"{display_condition_value(field, row_value)}"
-            )
-        else:
-            different.append(
-                f"{metadata['label']}: requested "
-                f"{display_condition_value(field, query_value)}; "
-                f"test reports {display_condition_value(field, row_value)}"
-            )
-
-    return matched, different
-
-
-def resource_tags(resources_text: str) -> str:
-    resources = [
-        item.strip()
-        for item in str(resources_text).split("|")
-        if item.strip()
-    ]
-    return "".join(
-        f'<span class="resource-tag">{escape(resource)}</span>'
-        for resource in resources
-    )
-
-
-def investigation_card(row: pd.Series) -> str:
-    record_count = int(row["ember_record_count"])
-    if record_count > 0:
-        coverage = f"{record_count} structured records available in Q’AQ’ Lab"
-    else:
-        coverage = escape(str(row["ember_status"]))
-
-    identifier = str(row["psi_id"])
-    if str(row["acronym"]).strip():
-        identifier = f"{identifier} · {row['acronym']}"
-
-    detail_id = escape(str(row["psi_id"]), quote=True)
-    source_url = escape(str(row["source_url"]), quote=True)
-
-    return f"""
-    <div class="investigation-card">
-      <div class="psi-id">{escape(identifier)}</div>
-      <h3>{escape(str(row['title']))}</h3>
-      <div class="card-meta">
-        {escape(str(row['research_area']))}<br>
-        {escape(str(row['subresearch_area']))}<br>
-        {escape(str(row['project_type']))}<br>
-        {escape(str(row['nasa_center']))}
-      </div>
-      <p>{escape(str(row['objective_short']))}</p>
-      <div class="resource-list">{resource_tags(row['available_resources'])}</div>
-      <p>Experimental table: {escape(str(row['experimental_table_status']))}</p>
-      <div class="coverage">Q’AQ’ Lab coverage: {coverage}</div>
-      <div class="card-actions">
-        <a class="source-link" href="?page=library&amp;psi={detail_id}" target="_self">View investigation</a>
-        <a class="source-link secondary" href="{source_url}" target="_blank" rel="noopener noreferrer">Open in NASA PSI</a>
-      </div>
-    </div>
-    """
-
-
-def detail_item(label: str, value: str) -> str:
-    shown_value = value if str(value).strip() else "Not reported"
-    return f"""
-    <div class="detail-item">
-      <div class="detail-label">{escape(label)}</div>
-      <div class="detail-value">{escape(str(shown_value))}</div>
-    </div>
-    """
-
-
-def render_investigation_detail(row: pd.Series) -> None:
-    record_count = int(row["ember_record_count"])
-    coverage = (
-        f"{record_count} structured records available in Q’AQ’ Lab"
-        if record_count > 0
-        else str(row["ember_status"])
-    )
-
-    details = "".join(
-        [
-            detail_item("Research area", row["research_area"]),
-            detail_item("Subresearch area", row["subresearch_area"]),
-            detail_item("Project type", row["project_type"]),
-            detail_item("Flight platform", row["flight_platform"]),
-            detail_item("NASA center", row["nasa_center"]),
-            detail_item("DOI", row["doi"]),
-            detail_item("Start date", row["start_date"]),
-            detail_item("End date", row["end_date"]),
-            detail_item("License", row["license"]),
-        ]
-    )
-
-    source_url = escape(str(row["source_url"]), quote=True)
-
-    identifier = str(row["psi_id"])
-    if str(row["acronym"]).strip():
-        identifier = f"{identifier} · {row['acronym']}"
-
-    panel = f"""
-    <a class="detail-back" href="?page=library" target="_self">Back to Library</a>
-    <div class="detail-panel">
-      <div class="psi-id">{escape(identifier)}</div>
-      <h1>{escape(str(row['title']))}</h1>
-      <div class="detail-grid">{details}</div>
-      <h2>Research objective</h2>
-      <p>{escape(str(row['objective_short']))}</p>
-      <h2>Available resources</h2>
-      <div class="resource-list">{resource_tags(row['available_resources'])}</div>
-      <h2>Data availability</h2>
-      <p>Experimental table: {escape(str(row['experimental_table_status']))}</p>
-      <p>Modeling table: {escape(str(row['modeling_table_status']))}</p>
-      <p>Structured records in Q’AQ’ Lab: {escape(coverage)}</p>
-      <h2>Related investigations</h2>
-      <p>{escape(str(row['related_investigations']) or 'Not reported')}</p>
-      <div class="card-actions">
-        <a class="source-link" href="{source_url}" target="_blank" rel="noopener noreferrer">Open in NASA PSI</a>
-      </div>
-    </div>
-    """
-
-    st.markdown(f'<div class="em">{panel}</div>', unsafe_allow_html=True)
-
-
-def render_home() -> None:
-    nav = render_nav("home")
-    st.markdown(
-        f'<div class="em">{nav}{hero}{body}</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def render_library() -> None:
-    nav = render_nav("library")
-    header = html(
-        """
-        <div class="library-header">
-          <div class="eyebrow">NASA PHYSICAL SCIENCES INFORMATICS</div>
-          <h1>PSI Research Library</h1>
-          <p>Browse selected NASA PSI investigations and review the evidence available for each project. Q’AQ’ Lab distinguishes between investigation metadata, reports, analyzed data, publications, and structured experimental records.</p>
-        </div>
-        """
-    )
-
-    st.markdown(
-        f'<div class="em">{nav}{header}</div>',
-        unsafe_allow_html=True,
-    )
-
-    try:
-        investigations = load_investigations()
-    except (FileNotFoundError, ValueError) as error:
-        st.error(str(error))
-        return
-
-    selected_psi = get_query_value("psi", "").strip()
-    if selected_psi:
-        selected_rows = investigations[
-            investigations["psi_id"].astype(str).str.casefold()
-            == selected_psi.casefold()
-        ]
-        if selected_rows.empty:
-            st.warning("The selected investigation was not found in the catalog.")
-        else:
-            render_investigation_detail(selected_rows.iloc[0])
-            return
-
-    search_column, area_column, type_column = st.columns([2, 1, 1])
-
-    with search_column:
-        search = st.text_input(
-            "Search",
-            placeholder="Search by PSI ID, acronym, or title",
-        )
-
-    areas = [
-        "All",
-        *sorted(
-            value
-            for value in investigations["research_area"].unique()
-            if value
-        ),
-    ]
-
-    project_types = [
-        "All",
-        *sorted(
-            value
-            for value in investigations["project_type"].unique()
-            if value
-        ),
-    ]
-
-    with area_column:
-        selected_area = st.selectbox("Research area", areas)
-
-    with type_column:
-        selected_type = st.selectbox("Project type", project_types)
-
-    resource_options = sorted(
-        {
-            resource.strip()
-            for resource_text in investigations["available_resources"]
-            for resource in str(resource_text).split("|")
-            if resource.strip()
-        }
-    )
-
-    resources_column, coverage_column = st.columns([2, 1])
-
-    with resources_column:
-        selected_resources = st.multiselect(
-            "Available resources",
-            resource_options,
-        )
-
-    with coverage_column:
-        selected_coverage = st.selectbox(
-            "Structured records in Q’AQ’ Lab",
-            ["All", "Available", "Not yet curated"],
-        )
-
-    filtered = investigations.copy()
-
-    if search:
-        searchable = (
-            filtered[["psi_id", "acronym", "title"]]
-            .astype(str)
-            .agg(" ".join, axis=1)
-        )
-        filtered = filtered[
-            searchable.str.contains(search, case=False, regex=False)
-        ]
-
-    if selected_area != "All":
-        filtered = filtered[filtered["research_area"] == selected_area]
-
-    if selected_type != "All":
-        filtered = filtered[filtered["project_type"] == selected_type]
-
-    if selected_resources:
-        filtered = filtered[
-            filtered["available_resources"].apply(
-                lambda value: all(
-                    resource
-                    in {
-                        item.strip()
-                        for item in str(value).split("|")
-                        if item.strip()
-                    }
-                    for resource in selected_resources
-                )
-            )
-        ]
-
-    if selected_coverage == "Available":
-        filtered = filtered[filtered["ember_record_count"] > 0]
-    elif selected_coverage == "Not yet curated":
-        filtered = filtered[filtered["ember_record_count"] == 0]
-
-    st.markdown(
-        f'<div class="results-count">{len(filtered)} investigations found</div>',
-        unsafe_allow_html=True,
-    )
-
-    if filtered.empty:
-        st.info("No investigations match the selected filters.")
-        return
-
-    card_columns = st.columns(2)
-    for position, (_, row) in enumerate(filtered.iterrows()):
-        with card_columns[position % 2]:
-            st.markdown(
-                investigation_card(row),
-                unsafe_allow_html=True,
-            )
-
-    st.markdown(
-        '<div class="footer">Q’AQ’ Lab — Experimental evidence organized for research.</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def evidence_summary(
-    routed_to: str,
-    status_label: str,
-    status_class: str,
-    reviewed: str,
-    found: str,
-) -> str:
-    return html(f"""
-    <div class="evidence-summary">
-      <div class="summary-item">
-        <div class="summary-label">Routed to</div>
-        <div class="summary-value">{escape(routed_to)}</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Evidence coverage</div>
-        <div class="summary-value"><span class="coverage-badge {status_class}">{escape(status_label)}</span></div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Records reviewed</div>
-        <div class="summary-value">{escape(reviewed)}</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Evidence found</div>
-        <div class="summary-value">{escape(found)}</div>
-      </div>
-    </div>
-    """)
-
-
-def match_card(
-    row: pd.Series,
-    query: dict[str, object],
-) -> str:
-    matched, different = compare_record_to_query(row, query)
-    matched_text = "<br>".join(escape(item) for item in matched)
-    different_text = "<br>".join(escape(item) for item in different)
-
-    why_parts = []
-    if matched:
-        why_parts.append(
-            f"<strong>Matched conditions:</strong><br>{matched_text}"
-        )
-    if different:
-        why_parts.append(
-            f"<strong>Different conditions:</strong><br>{different_text}"
-        )
-    why_html = "<br><br>".join(why_parts)
-
-    airflow_start = display_condition_value(
-        "airflow_start_cm_s", row["airflow_start_cm_s"]
-    )
-    airflow_end = display_condition_value(
-        "airflow_end_cm_s", row["airflow_end_cm_s"]
-    )
-    oxygen = display_condition_value(
-        "oxygen_vol_pct", row["oxygen_vol_pct"]
-    )
-    width = display_condition_value(
-        "sample_width_cm", row["sample_width_cm"]
-    )
-    sample_condition = display_condition_value(
-        "reused_sample", row["reused_sample"]
-    )
-
-    source_page = row["source_page"]
-    if pd.notna(source_page):
-        try:
-            source_page = str(int(float(source_page)))
-        except (TypeError, ValueError):
-            source_page = str(source_page)
-    else:
-        source_page = "Not reported"
-
-    limitation = str(row["exclusion_reason"]).strip()
-    if not limitation:
-        limitation = "No record-specific limitation was reported in the curated table."
-
-    return html(f"""
-    <div class="match-card">
-      <div class="psi-id">{escape(str(row['test_id']))} · BASS-II</div>
-      <h3>{escape(str(row['material']))}</h3>
-      <div class="condition-chips">
-        <span class="condition-chip">O₂ {escape(oxygen)}</span>
-        <span class="condition-chip">Airflow {escape(airflow_start)} → {escape(airflow_end)}</span>
-        <span class="condition-chip">{escape(str(row['airflow_profile']))} profile</span>
-        <span class="condition-chip">Width {escape(width)}</span>
-        <span class="condition-chip">{escape(sample_condition)}</span>
-      </div>
-      <p><strong>Documented outcome:</strong> {escape(str(row['observed_outcome']))}</p>
-      <p><strong>Explicit ignition:</strong> {escape(str(row['ignited_explicit']))}</p>
-      <p class="why">{why_html}</p>
-      <p><strong>Source:</strong> NASA/TM-20210011385 · {escape(str(row['source_table']))} · p. {escape(source_page)}</p>
-      <p class="limitation">{escape(limitation)} This observed outcome is not a fire-risk probability or a universal safety threshold.</p>
-      <div class="card-actions">
-        <a class="source-link" href="{BASSII_REPORT_URL}" target="_blank" rel="noopener noreferrer">Open source report</a>
-      </div>
-    </div>
-    """)
-
-
-def render_flame_results(
-    tests: pd.DataFrame,
-    query: dict[str, object],
-) -> None:
-    result = match_evidence(tests, query)
-    status = str(result["status"])
-    records = result["records"]
-
-    if status == "direct":
-        status_label = "Direct record evidence"
-        status_class = "direct"
-        found = f"{len(records)} matching record" + (
-            "" if len(records) == 1 else "s"
-        )
-        explanation = (
-            "At least one BASS-II/SIBAL record matches every condition "
-            "selected in the submitted question. The result describes "
-            "documented tests; it does not predict an untested scenario."
-        )
-        shown_records = records.head(6)
-    elif status == "partial":
-        status_label = "Partial record evidence"
-        status_class = "partial"
-        found = "1 closest documented record"
-        explanation = (
-            "The selected values fall within the general range represented "
-            "by the prototype, but no single record combines every condition. "
-            "The closest record is shown below and each difference is "
-            "identified explicitly."
-        )
-        shown_records = records
-    else:
-        status_label = "Outside current coverage"
-        status_class = "outside"
-        found = "1 closest record for reference"
-        outside_text = "; ".join(result["outside"])
-        explanation = (
-            "No structured record in this prototype supports all selected "
-            f"conditions. Outside coverage: {outside_text}. The closest "
-            "record is shown only to identify the current evidence boundary, "
-            "not to extrapolate an outcome."
-        )
-        shown_records = records
-
-    summary = evidence_summary(
-        "BASS-II / SIBAL",
-        status_label,
-        status_class,
-        str(len(tests)),
-        found,
-    )
-    explanation_panel = html(f"""
-    <div class="result-explanation">
-      <h3>Why this result</h3>
-      <p>{escape(explanation)}</p>
-    </div>
-    """)
-
-    st.markdown(
-        f'<div class="em">{summary}{explanation_panel}</div>',
-        unsafe_allow_html=True,
-    )
-
-    for _, row in shown_records.iterrows():
-        st.markdown(
-            f'<div class="em">{match_card(row, query)}</div>',
-            unsafe_allow_html=True,
-        )
-
-    if status == "direct" and len(records) > len(shown_records):
-        st.caption(
-            f"{len(records) - len(shown_records)} additional direct matches "
-            "are not displayed in this compact prototype view."
-        )
-
-
-def render_same_results(request: dict[str, object]) -> None:
-    focus = str(request.get("focus", "Smoke particle behavior"))
-    material = str(request.get("material", "Any documented material"))
-
-    summary = evidence_summary(
-        "SAME · PSI-102",
-        "Documentary evidence only",
-        "documentary",
-        "Investigation metadata and reports",
-        "1 relevant investigation",
-    )
-
-    panel = html(f"""
-    <div class="result-explanation">
-      <h3>Why this result</h3>
-      <p>SAME is relevant because the submitted question concerns {escape(focus.lower())}. The selected material is {escape(material)}. SAME examined smoke-particle behavior and spacecraft detector response under low-gravity conditions.</p>
-    </div>
-    <div class="documentary-panel">
-      <div class="psi-id">PSI-102 · SAME</div>
-      <h2>Smoke and Aerosol Measurement Experiment</h2>
-      <p><strong>Evidence level:</strong> Investigation metadata and report-level evidence.</p>
-      <p><strong>Current limitation:</strong> Structured SAME run records have not been curated in this prototype, so Q’AQ’ Lab does not claim a condition-level match or generate a detector-performance prediction.</p>
-      <p><strong>Related investigation:</strong> SAME-R · PSI-101.</p>
-      <div class="card-actions">
-        <a class="source-link" href="?page=library&amp;psi=PSI-102" target="_self">View Library record</a>
-        <a class="source-link secondary" href="{SAME_PSI_URL}" target="_blank" rel="noopener noreferrer">Open in NASA PSI</a>
-      </div>
-    </div>
-    """)
-
-    st.markdown(
-        f'<div class="em">{summary}{panel}</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def render_experiment_explorer() -> None:
-    nav = render_nav("explorer")
-
-    try:
-        tests = load_bassii_tests()
-    except (FileNotFoundError, ValueError) as error:
-        st.markdown(f'<div class="em">{nav}</div>', unsafe_allow_html=True)
-        st.error(str(error))
-        return
-
-    oxygen_min = float(tests["oxygen_vol_pct"].min())
-    oxygen_max = float(tests["oxygen_vol_pct"].max())
-    airflow_min = float(tests["airflow_start_cm_s"].min())
-    airflow_max = float(tests["airflow_start_cm_s"].max())
-
-    header = html(f"""
-    <div class="explorer-header">
-      <div class="eyebrow">EVIDENCE ROUTING AND COVERAGE</div>
-      <h1>Experiment Explorer</h1>
-      <p>Describe the evidence you need. Q’AQ’ Lab routes the question to the relevant PSI investigation and shows which conditions are directly represented, partially represented, or outside the current prototype.</p>
-      <div class="dataset-strip">
-        <span class="dataset-stat">{len(tests)} BASS-II / SIBAL records</span>
-        <span class="dataset-stat">O₂ {oxygen_min:.1f}–{oxygen_max:.1f} vol. %</span>
-        <span class="dataset-stat">Initial airflow {airflow_min:.1f}–{airflow_max:.1f} cm/s</span>
-        <span class="dataset-stat">SAME report routing</span>
-      </div>
-    </div>
-    <div class="question-intro">
-      <h2>Build a research question</h2>
-      <p>Select only the conditions that matter. Conditions left at Any are not used when comparing records.</p>
-    </div>
-    """)
-    st.markdown(
-        f'<div class="em">{nav}{header}</div>',
-        unsafe_allow_html=True,
-    )
-
-    research_need = st.selectbox(
-        "Research need",
-        ["Flame behavior", "Smoke and detector response"],
-        key="explorer_research_need",
-    )
-
-    if research_need == "Flame behavior":
-        st.markdown(
-            """
-            <div class="em"><div class="fixed-condition">
-              <strong>Fixed prototype context:</strong> SIBAL fabric, microgravity aboard the ISS, 1 atm, concurrent flow. Only the selected fields below affect matching.
-            </div></div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        oxygen_column, initial_airflow_column = st.columns(2)
-        with oxygen_column:
-            use_oxygen = st.checkbox(
-                "Include oxygen concentration",
-                value=True,
-                key="explorer_use_oxygen",
-            )
-            oxygen_value = st.number_input(
-                "Oxygen concentration (vol. %)",
-                min_value=0.0,
-                max_value=100.0,
-                value=18.5,
-                step=0.1,
-                disabled=not use_oxygen,
-                key="explorer_oxygen",
-            )
-
-        with initial_airflow_column:
-            use_initial_airflow = st.checkbox(
-                "Include initial airflow",
-                value=True,
-                key="explorer_use_initial_airflow",
-            )
-            initial_airflow_value = st.number_input(
-                "Initial airflow (cm/s)",
-                min_value=0.0,
-                max_value=100.0,
-                value=10.0,
-                step=0.1,
-                disabled=not use_initial_airflow,
-                key="explorer_initial_airflow",
-            )
-
-        final_airflow_column, profile_column = st.columns(2)
-        with final_airflow_column:
-            use_final_airflow = st.checkbox(
-                "Include final airflow",
-                value=False,
-                key="explorer_use_final_airflow",
-            )
-            final_airflow_value = st.number_input(
-                "Final airflow (cm/s)",
-                min_value=0.0,
-                max_value=100.0,
-                value=10.0,
-                step=0.1,
-                disabled=not use_final_airflow,
-                key="explorer_final_airflow",
-            )
-
-        with profile_column:
-            profile_options = [
-                "Any",
-                *sorted(tests["airflow_profile"].dropna().unique()),
-            ]
-            airflow_profile = st.selectbox(
-                "Airflow profile",
-                profile_options,
-                key="explorer_profile",
-            )
-
-        width_column, sample_column = st.columns(2)
-        with width_column:
-            width_values = sorted(
-                float(value)
-                for value in tests["sample_width_cm"].dropna().unique()
-            )
-            width_labels = ["Any", *[f"{value:g} cm" for value in width_values]]
-            selected_width = st.selectbox(
-                "Sample width",
-                width_labels,
-                key="explorer_width",
-            )
-
-        with sample_column:
-            sample_condition = st.selectbox(
-                "Sample condition",
-                ["Any", "New sample", "Reused sample"],
-                key="explorer_sample_condition",
-            )
-
-        ignition_column, outcome_column = st.columns(2)
-        with ignition_column:
-            ignition = st.selectbox(
-                "Explicit ignition",
-                [
-                    "Any",
-                    *sorted(tests["ignited_explicit"].dropna().unique()),
-                ],
-                key="explorer_ignition",
-            )
-
-        with outcome_column:
-            outcome = st.selectbox(
-                "Documented outcome",
-                [
-                    "Any",
-                    *sorted(tests["observed_outcome"].dropna().unique()),
-                ],
-                key="explorer_outcome",
-            )
-
-        if st.button("Find supporting evidence", key="submit_flame_query"):
-            query: dict[str, object] = {}
-            if use_oxygen:
-                query["oxygen_vol_pct"] = float(oxygen_value)
-            if use_initial_airflow:
-                query["airflow_start_cm_s"] = float(initial_airflow_value)
-            if use_final_airflow:
-                query["airflow_end_cm_s"] = float(final_airflow_value)
-            if airflow_profile != "Any":
-                query["airflow_profile"] = airflow_profile
-            if selected_width != "Any":
-                query["sample_width_cm"] = float(
-                    selected_width.replace(" cm", "")
-                )
-            if sample_condition != "Any":
-                query["reused_sample"] = (
-                    "Yes" if sample_condition == "Reused sample" else "No"
-                )
-            if ignition != "Any":
-                query["ignited_explicit"] = ignition
-            if outcome != "Any":
-                query["observed_outcome"] = outcome
-
-            if query:
-                st.session_state["explorer_request"] = {
-                    "need": "flame",
-                    "query": query,
-                }
-            else:
-                st.warning("Select at least one condition before searching.")
-
-        submitted = st.session_state.get("explorer_request", {})
-        if submitted.get("need") == "flame":
-            render_flame_results(tests, submitted["query"])
-
-    else:
-        st.markdown(
-            """
-            <div class="em"><div class="fixed-condition">
-              <strong>Current prototype coverage:</strong> SAME is connected at investigation and report level. Condition-level SAME records have not been curated.
-            </div></div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        focus_column, material_column = st.columns(2)
-        with focus_column:
-            smoke_focus = st.selectbox(
-                "Research focus",
-                [
-                    "Smoke particle size",
-                    "Smoke transport and aging",
-                    "Smoke detector response",
-                ],
-                key="explorer_smoke_focus",
-            )
-
-        with material_column:
-            smoke_material = st.selectbox(
-                "Material of interest",
-                [
-                    "Any documented material",
-                    "Teflon",
-                    "Kapton",
-                    "Cellulose",
-                    "Silicone rubber",
-                    "Dibutyl phthalate",
-                    "Pyrell (SAME-R)",
-                ],
-                key="explorer_smoke_material",
-            )
-
-        if st.button("Find supporting evidence", key="submit_smoke_query"):
-            st.session_state["explorer_request"] = {
-                "need": "smoke",
-                "focus": smoke_focus,
-                "material": smoke_material,
-            }
-
-        submitted = st.session_state.get("explorer_request", {})
-        if submitted.get("need") == "smoke":
-            render_same_results(submitted)
-
-    st.markdown(
-        '<div class="footer">Q’AQ’ Lab — Evidence routing without unsupported prediction.</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def case_list(items: list[str]) -> str:
-    return "".join(
-        f'<div class="case-list-item">{escape(item)}</div>'
-        for item in items
-    )
-
-
-def accident_case_card(row: pd.Series) -> str:
-    factors = split_pipe_values(row["contributing_factors"])
-    consequences = split_pipe_values(row["operational_consequences"])
-    responses = split_pipe_values(row["response_actions"])
-    research_topics = split_pipe_values(row["research_focus"])
-
-    topic_tags = "".join(
-        f'<span class="case-tag">{escape(topic)}</span>'
-        for topic in research_topics
-    )
-
-    related_psi = str(row["related_psi"]).strip()
-    if related_psi == "BASS-II":
-        psi_link = (
-            '<a class="source-link" href="?page=library&amp;psi=PSI-25" '
-            'target="_self">View BASS-II in Library</a>'
-        )
-    elif related_psi == "SAME":
-        psi_link = (
-            '<a class="source-link" href="?page=library&amp;psi=PSI-102" '
-            'target="_self">View SAME in Library</a>'
-        )
-    else:
-        psi_link = ""
-
-    source_url = escape(str(row["source_url"]), quote=True)
-    event_date = escape(str(row["event_date"]))
-
-    return html(f"""
-    <div class="case-card">
-      <div class="psi-id">{escape(str(row['case_id']))} · {event_date}</div>
-      <h2>{escape(str(row['title']))}</h2>
-      <div class="case-meta">
-        <span class="case-tag">{escape(str(row['setting']))}</span>
-        <span class="case-tag">{escape(str(row['event_type']))}</span>
-        <span class="case-tag">{escape(str(row['evidence_level']))}</span>
-        {topic_tags}
-      </div>
-
-      <div class="case-overview">
-        <div class="case-overview-item">
-          <div class="detail-label">Initiating event</div>
-          <div class="detail-value">{escape(str(row['initiating_event']))}</div>
-        </div>
-        <div class="case-overview-item">
-          <div class="detail-label">People affected</div>
-          <div class="detail-value">{int(row['crew_affected'])}</div>
-        </div>
-        <div class="case-overview-item">
-          <div class="detail-label">Documented outcome</div>
-          <div class="detail-value">{escape(str(row['outcome']))}</div>
-        </div>
-      </div>
-
-      <div class="case-section">
-        <h3>Documented contributing factors</h3>
-        <div class="case-list">{case_list(factors)}</div>
-      </div>
-
-      <div class="case-section">
-        <h3>Operational consequences</h3>
-        <div class="case-list">{case_list(consequences)}</div>
-      </div>
-
-      <div class="case-section">
-        <h3>Response and recovery</h3>
-        <div class="case-list">{case_list(responses)}</div>
-      </div>
-
-      <div class="case-section psi-connection">
-        <h3>Connection to PSI evidence</h3>
-        <p><strong>{escape(str(row['relationship_type']))}</strong></p>
-        <p>{escape(str(row['psi_relation_note']))}</p>
-        <div class="card-actions">{psi_link}</div>
-      </div>
-
-      <div class="case-section">
-        <h3>Evidence boundary</h3>
-        <p class="evidence-boundary">{escape(str(row['interpretation_limit']))}</p>
-      </div>
-
-      <div class="card-actions">
-        <a class="source-link" href="{source_url}" target="_blank" rel="noopener noreferrer">Open official NASA source</a>
-      </div>
-    </div>
-    """)
-
-
-def render_accident_cases() -> None:
-    nav = render_nav("accidents")
-
-    try:
-        cases = load_accident_cases()
-    except (FileNotFoundError, ValueError) as error:
-        st.markdown(f'<div class="em">{nav}</div>', unsafe_allow_html=True)
-        st.error(str(error))
-        return
-
-    header = html(f"""
-    <div class="cases-header">
-      <div class="eyebrow">DOCUMENTED OPERATIONAL CONTEXT</div>
-      <h1>Accident Cases</h1>
-      <p>Explore documented spacecraft incidents and ground-test failures. Q’AQ’ Lab separates historical facts, operational lessons, and experimental evidence so case narratives are not treated as probabilities or training labels.</p>
-      <div class="dataset-strip">
-        <span class="dataset-stat">{len(cases)} NASA-documented cases</span>
-        <span class="dataset-stat">Historical evidence</span>
-        <span class="dataset-stat">No accident probabilities</span>
-      </div>
-    </div>
-    <div class="question-intro">
-      <h2>Choose a research context</h2>
-      <p>Filter the cases by operational setting, research focus, or connection to PSI evidence.</p>
-    </div>
-    """)
-
-    st.markdown(
-        f'<div class="em">{nav}{header}</div>',
-        unsafe_allow_html=True,
-    )
-
-    search_column, focus_column, setting_column = st.columns([1.4, 1, 1])
-
-    with search_column:
-        search = st.text_input(
-            "Search cases",
-            placeholder="Search by case, event, factor, or response",
-            key="accident_search",
-        )
-
-    focus_options = sorted(
-        {
-            topic
-            for value in cases["research_focus"]
-            for topic in split_pipe_values(value)
-        }
-    )
-    with focus_column:
-        selected_focus = st.selectbox(
-            "Research focus",
-            ["All", *focus_options],
-            key="accident_focus",
-        )
-
-    with setting_column:
-        selected_setting = st.selectbox(
-            "Operational setting",
-            ["All", *sorted(cases["setting"].unique())],
-            key="accident_setting",
-        )
-
-    selected_psi = st.selectbox(
-        "Related PSI evidence",
-        ["All", "BASS-II", "SAME", "No direct PSI match"],
-        key="accident_psi",
-    )
-
-    filtered = cases.copy()
-
-    if search:
-        searchable_columns = [
-            "title",
-            "event_type",
-            "initiating_event",
-            "contributing_factors",
-            "operational_consequences",
-            "response_actions",
-            "research_focus",
-        ]
-        searchable = (
-            filtered[searchable_columns]
-            .astype(str)
-            .agg(" ".join, axis=1)
-        )
-        filtered = filtered[
-            searchable.str.contains(search, case=False, regex=False)
-        ]
-
-    if selected_focus != "All":
-        filtered = filtered[
-            filtered["research_focus"].apply(
-                lambda value: selected_focus in split_pipe_values(value)
-            )
-        ]
-
-    if selected_setting != "All":
-        filtered = filtered[filtered["setting"] == selected_setting]
-
-    if selected_psi == "No direct PSI match":
-        filtered = filtered[filtered["related_psi"].str.strip() == ""]
-    elif selected_psi != "All":
-        filtered = filtered[filtered["related_psi"] == selected_psi]
-
-    st.markdown(
-        f'<div class="case-count">{len(filtered)} relevant case' +
-        ('</div>' if len(filtered) == 1 else 's</div>'),
-        unsafe_allow_html=True,
-    )
-
-    if filtered.empty:
-        st.info("No documented cases match the selected context.")
-        return
-
-    case_ids = filtered["case_id"].tolist()
-    labels = {
-        row["case_id"]: f"{row['title']} · {row['event_date']}"
-        for _, row in filtered.iterrows()
-    }
-    if st.session_state.get("selected_accident_case") not in case_ids:
-        st.session_state["selected_accident_case"] = case_ids[0]
-    selected_case = st.selectbox(
-        "Select a case for detailed review",
-        case_ids,
-        format_func=lambda case_id: labels[case_id],
-        key="selected_accident_case",
-    )
-
-    selected_row = filtered[filtered["case_id"] == selected_case].iloc[0]
-    st.markdown(
-        f'<div class="em">{accident_case_card(selected_row)}</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        '<div class="footer">Historical cases support context and research questions. They are not experimental observations, accident-frequency data, or prediction labels.</div>',
-        unsafe_allow_html=True,
-    )
-
-
-# ---------------------------------------------------------------------------
-# Data Lab
-# ---------------------------------------------------------------------------
+if st.session_state.get("selected_accident_case") not in case_ids:
+    st.session_state["selected_accident_case"] = case_ids[0]
+selected_case = st.selectbox(
+    "Select a case for detailed review",
+    case_ids,
+    format_func=lambda case_id: labels[case_id],
+    key="selected_accident_case",
+)
+
+selected_row = filtered[filtered["case_id"] == selected_case].iloc[0]
+st.markdown(
+    f'<div class="em">{accident_case_card(selected_row)}</div>',
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    '<div class="footer">Historical cases support context and research questions. They are not experimental observations, accident-frequency data, or prediction labels.</div>',
+    unsafe_allow_html=True,
+)
+
+---------------------------------------------------------------------------
+
+Data Lab
+
+---------------------------------------------------------------------------
 
 DL_COLORS = {
-    "Flame extinction by quenching": "#F25C05",
-    "No ignition": "#78C8C3",
-    "Blowoff": "#E7B55A",
-    "No blowoff": "#B58BE0",
-    "Outcome not specified": "#8A8A88",
-    "Reused sample: ignition": "#FF9A52",
-    "Reused sample: no ignition": "#4FA39E",
-    "Reused sample: one-sided flame": "#D89595",
+"Flame extinction by quenching": "#F25C05",
+"No ignition": "#78C8C3",
+"Blowoff": "#E7B55A",
+"No blowoff": "#B58BE0",
+"Outcome not specified": "#8A8A88",
+"Reused sample: ignition": "#FF9A52",
+"Reused sample: no ignition": "#4FA39E",
+"Reused sample: one-sided flame": "#D89595",
 }
 DL_TEXT = "#CFCFCC"
 DL_GRID = "rgba(255,255,255,0.07)"
 
-# Observed ranges of the SIBAL subset (Dominio sheet). Used only to draw the
-# envelope; they are recomputed from the data below, never typed by hand.
+Observed ranges of the SIBAL subset (Dominio sheet). Used only to draw the
+
+envelope; they are recomputed from the data below, never typed by hand.
+
 OUTCOME_ORDER = list(DL_COLORS.keys())
 
-
 def ml_readiness_counts(frame: pd.DataFrame) -> tuple[int, int]:
-    """Return labeled targets and records explicitly eligible for modeling."""
-    if "sustained_spread_label" not in frame.columns:
-        return 0, 0
+"""Return labeled targets and records explicitly eligible for modeling."""
+if "sustained_spread_label" not in frame.columns:
+return 0, 0
 
-    labels = frame["sustained_spread_label"].astype("string").str.strip()
-    labeled = labels.notna() & labels.ne("")
+labels = frame["sustained_spread_label"].astype("string").str.strip()
+labeled = labels.notna() & labels.ne("")
 
-    if "model_eligible" not in frame.columns:
-        return int(labeled.sum()), int(labeled.sum())
+if "model_eligible" not in frame.columns:
+    return int(labeled.sum()), int(labeled.sum())
 
-    eligible = (
-        frame["model_eligible"]
-        .astype("string")
-        .str.strip()
-        .str.casefold()
-        .isin({"true", "1", "yes"})
-    )
-    return int(labeled.sum()), int((labeled & eligible).sum())
-
+eligible = (
+    frame["model_eligible"]
+    .astype("string")
+    .str.strip()
+    .str.casefold()
+    .isin({"true", "1", "yes"})
+)
+return int(labeled.sum()), int((labeled & eligible).sum())
 
 @st.cache_data(show_spinner=False)
 def load_same_sizes() -> pd.DataFrame:
-    path = DATA_DIR / "same_particle_sizes.csv"
-    if not path.is_file():
-        raise FileNotFoundError(f"Missing file: {path}.")
-    frame = pd.read_csv(path)
-    frame["change_nm"] = frame["aged_720s_nm"] - frame["base_nm"]
-    frame["change_pct"] = frame["change_nm"] / frame["base_nm"] * 100
-    return frame
-
+path = DATA_DIR / "same_particle_sizes.csv"
+if not path.is_file():
+raise FileNotFoundError(f"Missing file: {path}.")
+frame = pd.read_csv(path)
+frame["change_nm"] = frame["aged_720s_nm"] - frame["base_nm"]
+frame["change_pct"] = frame["change_nm"] / frame["base_nm"] * 100
+return frame
 
 @st.cache_data(show_spinner=False)
 def load_saffire() -> pd.DataFrame:
-    path = DATA_DIR / "saffire_tests.csv"
-    if not path.is_file():
-        raise FileNotFoundError(f"Missing file: {path}.")
-    frame = pd.read_csv(path)
-    for column in ["sample_width_cm", "sample_length_cm", "thickness_mm",
-                   "flow_cm_s", "oxygen_vol_pct", "duration_s", "spread_rate_mm_s"]:
-        frame[column] = pd.to_numeric(frame[column], errors="coerce")
-    return frame
-
+path = DATA_DIR / "saffire_tests.csv"
+if not path.is_file():
+raise FileNotFoundError(f"Missing file: {path}.")
+frame = pd.read_csv(path)
+for column in ["sample_width_cm", "sample_length_cm", "thickness_mm",
+"flow_cm_s", "oxygen_vol_pct", "duration_s", "spread_rate_mm_s"]:
+frame[column] = pd.to_numeric(frame[column], errors="coerce")
+return frame
 
 def dl_style(chart):
-    import altair as alt  # bundled with Streamlit
+import altair as alt  # bundled with Streamlit
 
-    return (
-        chart.configure(background="transparent")
-        .configure_view(stroke=None)
-        .configure_axis(
-            labelColor=DL_TEXT, titleColor=DL_TEXT, gridColor=DL_GRID,
-            domainColor="rgba(255,255,255,0.2)", tickColor="rgba(255,255,255,0.2)",
-            labelFontSize=12, titleFontSize=12, titleFontWeight=600,
-        )
-        .configure_legend(
-            labelColor=DL_TEXT, titleColor=DL_TEXT, labelFontSize=11,
-            titleFontSize=11, orient="bottom", columns=2, symbolType="circle",
-        )
-        .configure_title(color="#F4F4F2", fontSize=14, anchor="start")
+return (
+    chart.configure(background="transparent")
+    .configure_view(stroke=None)
+    .configure_axis(
+        labelColor=DL_TEXT, titleColor=DL_TEXT, gridColor=DL_GRID,
+        domainColor="rgba(255,255,255,0.2)", tickColor="rgba(255,255,255,0.2)",
+        labelFontSize=12, titleFontSize=12, titleFontWeight=600,
     )
-
+    .configure_legend(
+        labelColor=DL_TEXT, titleColor=DL_TEXT, labelFontSize=11,
+        titleFontSize=11, orient="bottom", columns=2, symbolType="circle",
+    )
+    .configure_title(color="#F4F4F2", fontSize=14, anchor="start")
+)
 
 def dl_header(title: str, text: str, chips: list[str]) -> str:
-    strip = "".join(f'<span class="dataset-stat">{escape(c)}</span>' for c in chips)
-    return f"""
-    <div class="explorer-header">
-      <div class="eyebrow">EXPERIMENT CONDITIONS CHECK</div>
-      <h1>{escape(title)}</h1>
-      <p>{escape(text)}</p>
-      <div class="dataset-strip">{strip}</div>
-    </div>
-    """
-
+strip = "".join(f'<span class="dataset-stat">{escape(c)}</span>' for c in chips)
+return f"""
+<div class="explorer-header">
+<div class="eyebrow">EXPERIMENT CONDITIONS CHECK</div>
+<h1>{escape(title)}</h1>
+<p>{escape(text)}</p>
+<div class="dataset-strip">{strip}</div>
+</div>
+"""
 
 def dl_note(title: str, text: str, tone: str = "") -> str:
-    cls = "result-explanation" if not tone else f"documentary-panel"
-    return f'<div class="{cls}"><h3>{escape(title)}</h3><p>{escape(text)}</p></div>'
-
+cls = "result-explanation" if not tone else f"documentary-panel"
+return f'<div class="{cls}"><h3>{escape(title)}</h3><p>{escape(text)}</p></div>'
 
 def dl_stat(label: str, value: str, hint: str = "") -> str:
-    hint_html = f'<div class="stat-hint">{escape(hint)}</div>' if hint else ""
-    return (
-        '<div class="summary-item">'
-        f'<div class="summary-label">{escape(label)}</div>'
-        f'<div class="summary-value">{escape(value)}</div>{hint_html}</div>'
-    )
-
+hint_html = f'<div class="stat-hint">{escape(hint)}</div>' if hint else ""
+return (
+'<div class="summary-item">'
+f'<div class="summary-label">{escape(label)}</div>'
+f'<div class="summary-value">{escape(value)}</div>{hint_html}</div>'
+)
 
 def spread_offsets(frame: pd.DataFrame) -> pd.Series:
-    """Tiny visual offset (<= 0.1 vol. %) for tests that share exact coordinates."""
-    key = (
-        frame["oxygen_vol_pct"].astype(str) + "|"
-        + frame["airflow_start_cm_s"].astype(str) + "|"
-        + frame["airflow_end_cm_s"].astype(str)
-    )
-    rank = frame.groupby(key).cumcount()
-    size = key.map(key.value_counts())
-    return ((rank - (size - 1) / 2) * 0.07).where(size > 1, 0.0)
-
+"""Tiny visual offset (<= 0.1 vol. %) for tests that share exact coordinates."""
+key = (
+frame["oxygen_vol_pct"].astype(str) + "|"
++ frame["airflow_start_cm_s"].astype(str) + "|"
++ frame["airflow_end_cm_s"].astype(str)
+)
+rank = frame.groupby(key).cumcount()
+size = key.map(key.value_counts())
+return ((rank - (size - 1) / 2) * 0.07).where(size > 1, 0.0)
 
 def bassii_chart(frame: pd.DataFrame, scenario: dict | None, envelope: dict, highlight: list | None = None):
-    import altair as alt
+import altair as alt
 
-    plot = frame.copy()
-    plot["o2_plot"] = plot["oxygen_vol_pct"] + spread_offsets(plot)
-    plot["airflow_pair"] = (
-        plot["airflow_start_cm_s"].map(lambda v: f"{v:g}")
-        + " → " + plot["airflow_end_cm_s"].map(lambda v: f"{v:g}") + " cm/s"
-    )
-    plot["sample"] = plot["reused_sample"].map({"Yes": "Reused sample", "No": "New sample"})
-    plot["quality"] = plot["oxygen_caveat"].map(
-        {"Yes": "NASA flags this O₂ reading as possibly inaccurate", "No": "No flag"}
-    )
-    plot["width_label"] = plot["sample_width_cm"].map(lambda v: f"{v:g} cm")
+plot = frame.copy()
+plot["o2_plot"] = plot["oxygen_vol_pct"] + spread_offsets(plot)
+plot["airflow_pair"] = (
+    plot["airflow_start_cm_s"].map(lambda v: f"{v:g}")
+    + " → " + plot["airflow_end_cm_s"].map(lambda v: f"{v:g}") + " cm/s"
+)
+plot["sample"] = plot["reused_sample"].map({"Yes": "Reused sample", "No": "New sample"})
+plot["quality"] = plot["oxygen_caveat"].map(
+    {"Yes": "NASA flags this O₂ reading as possibly inaccurate", "No": "No flag"}
+)
+plot["width_label"] = plot["sample_width_cm"].map(lambda v: f"{v:g} cm")
 
-    scale = alt.Scale(domain=OUTCOME_ORDER, range=[DL_COLORS[k] for k in OUTCOME_ORDER])
-    x_enc = alt.X(
-        "o2_plot:Q", title="Oxygen concentration (vol. %)", axis=alt.Axis(values=list(range(15, 23)), format="d"),
-        scale=alt.Scale(domain=[envelope["o2_lo"] - 1.2, envelope["o2_hi"] + 1.2], nice=False, zero=False),
-    )
-    y_scale = alt.Scale(type="sqrt", domain=[0, envelope["flow_hi"] * 1.12])
-    tooltip = [
-        alt.Tooltip("test_id:N", title="Test"),
-        alt.Tooltip("observed_outcome:N", title="Documented outcome"),
-        alt.Tooltip("oxygen_vol_pct:Q", title="O₂ (vol. %)"),
-        alt.Tooltip("airflow_pair:N", title="Airflow start → end"),
-        alt.Tooltip("airflow_profile:N", title="Profile"),
-        alt.Tooltip("width_label:N", title="Sample width"),
-        alt.Tooltip("sample:N", title="Sample condition"),
-        alt.Tooltip("quality:N", title="Data quality"),
-        alt.Tooltip("source_table:N", title="Source table"),
-        alt.Tooltip("source_page:Q", title="Report page"),
-    ]
+scale = alt.Scale(domain=OUTCOME_ORDER, range=[DL_COLORS[k] for k in OUTCOME_ORDER])
+x_enc = alt.X(
+    "o2_plot:Q", title="Oxygen concentration (vol. %)", axis=alt.Axis(values=list(range(15, 23)), format="d"),
+    scale=alt.Scale(domain=[envelope["o2_lo"] - 1.2, envelope["o2_hi"] + 1.2], nice=False, zero=False),
+)
+y_scale = alt.Scale(type="sqrt", domain=[0, envelope["flow_hi"] * 1.12])
+tooltip = [
+    alt.Tooltip("test_id:N", title="Test"),
+    alt.Tooltip("observed_outcome:N", title="Documented outcome"),
+    alt.Tooltip("oxygen_vol_pct:Q", title="O₂ (vol. %)"),
+    alt.Tooltip("airflow_pair:N", title="Airflow start → end"),
+    alt.Tooltip("airflow_profile:N", title="Profile"),
+    alt.Tooltip("width_label:N", title="Sample width"),
+    alt.Tooltip("sample:N", title="Sample condition"),
+    alt.Tooltip("quality:N", title="Data quality"),
+    alt.Tooltip("source_table:N", title="Source table"),
+    alt.Tooltip("source_page:Q", title="Report page"),
+]
 
-    envelope_df = pd.DataFrame([{
-        "x0": envelope["o2_lo"], "x1": envelope["o2_hi"],
-        "y0": envelope["flow_lo"], "y1": envelope["flow_hi"],
-    }])
-    box = alt.Chart(envelope_df).mark_rect(
-        color="#F25C05", opacity=0.05, stroke="#F25C05", strokeOpacity=0.35,
-        strokeDash=[5, 4],
-    ).encode(
-        x=alt.X("x0:Q", scale=alt.Scale(domain=[envelope["o2_lo"] - 1.2, envelope["o2_hi"] + 1.2], nice=False, zero=False)),
-        x2="x1:Q", y=alt.Y("y0:Q", scale=y_scale), y2="y1:Q",
-    )
+envelope_df = pd.DataFrame([{
+    "x0": envelope["o2_lo"], "x1": envelope["o2_hi"],
+    "y0": envelope["flow_lo"], "y1": envelope["flow_hi"],
+}])
+box = alt.Chart(envelope_df).mark_rect(
+    color="#F25C05", opacity=0.05, stroke="#F25C05", strokeOpacity=0.35,
+    strokeDash=[5, 4],
+).encode(
+    x=alt.X("x0:Q", scale=alt.Scale(domain=[envelope["o2_lo"] - 1.2, envelope["o2_hi"] + 1.2], nice=False, zero=False)),
+    x2="x1:Q", y=alt.Y("y0:Q", scale=y_scale), y2="y1:Q",
+)
 
-    segment = alt.Chart(plot).mark_rule(strokeWidth=2, opacity=0.55).encode(
-        x=x_enc,
-        y=alt.Y("airflow_start_cm_s:Q", scale=y_scale, title="Airflow (cm/s, √ scale)"),
-        y2="airflow_end_cm_s:Q",
-        color=alt.Color("observed_outcome:N", scale=scale, legend=None),
-        strokeDash=alt.condition(alt.datum.reused_sample == "Yes", alt.value([4, 3]), alt.value([1, 0])),
-        tooltip=tooltip,
-    )
-    start = alt.Chart(plot).mark_point(filled=True, size=95, opacity=0.95, stroke="#090909", strokeWidth=1).encode(
-        x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale),
-        color=alt.Color("observed_outcome:N", scale=scale, title="Documented outcome",
-                        legend=alt.Legend(orient="bottom", columns=3, symbolType="circle")),
-        shape=alt.Shape("reused_sample:N", scale=alt.Scale(domain=["No", "Yes"], range=["circle", "square"]),
-                        legend=None),
-        tooltip=tooltip,
-    )
-    end = alt.Chart(plot[plot["airflow_start_cm_s"] != plot["airflow_end_cm_s"]]).mark_point(
-        shape="diamond", size=70, filled=False, strokeWidth=2,
-    ).encode(
-        x=x_enc, y=alt.Y("airflow_end_cm_s:Q", scale=y_scale),
-        color=alt.Color("observed_outcome:N", scale=scale, legend=None),
-        tooltip=tooltip,
-    )
-    flagged = alt.Chart(plot[plot["oxygen_caveat"] == "Yes"]).mark_point(
-        shape="circle", size=330, filled=False, stroke="#F4F4F2", strokeWidth=1.2, strokeDash=[2, 2],
-    ).encode(x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale), tooltip=tooltip)
+segment = alt.Chart(plot).mark_rule(strokeWidth=2, opacity=0.55).encode(
+    x=x_enc,
+    y=alt.Y("airflow_start_cm_s:Q", scale=y_scale, title="Airflow (cm/s, √ scale)"),
+    y2="airflow_end_cm_s:Q",
+    color=alt.Color("observed_outcome:N", scale=scale, legend=None),
+    strokeDash=alt.condition(alt.datum.reused_sample == "Yes", alt.value([4, 3]), alt.value([1, 0])),
+    tooltip=tooltip,
+)
+start = alt.Chart(plot).mark_point(filled=True, size=95, opacity=0.95, stroke="#090909", strokeWidth=1).encode(
+    x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale),
+    color=alt.Color("observed_outcome:N", scale=scale, title="Documented outcome",
+                    legend=alt.Legend(orient="bottom", columns=3, symbolType="circle")),
+    shape=alt.Shape("reused_sample:N", scale=alt.Scale(domain=["No", "Yes"], range=["circle", "square"]),
+                    legend=None),
+    tooltip=tooltip,
+)
+end = alt.Chart(plot[plot["airflow_start_cm_s"] != plot["airflow_end_cm_s"]]).mark_point(
+    shape="diamond", size=70, filled=False, strokeWidth=2,
+).encode(
+    x=x_enc, y=alt.Y("airflow_end_cm_s:Q", scale=y_scale),
+    color=alt.Color("observed_outcome:N", scale=scale, legend=None),
+    tooltip=tooltip,
+)
+flagged = alt.Chart(plot[plot["oxygen_caveat"] == "Yes"]).mark_point(
+    shape="circle", size=330, filled=False, stroke="#F4F4F2", strokeWidth=1.2, strokeDash=[2, 2],
+).encode(x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale), tooltip=tooltip)
 
-    layers = [box, segment, start, end, flagged]
-    if highlight:
-        layers.append(
-            alt.Chart(plot[plot["test_id"].isin(highlight)]).mark_point(
-                shape="circle", size=420, filled=False, stroke="#FFFFFF", strokeWidth=1.8,
-            ).encode(x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale), tooltip=tooltip)
+layers = [box, segment, start, end, flagged]
+if highlight:
+    layers.append(
+        alt.Chart(plot[plot["test_id"].isin(highlight)]).mark_point(
+            shape="circle", size=420, filled=False, stroke="#FFFFFF", strokeWidth=1.8,
+        ).encode(x=x_enc, y=alt.Y("airflow_start_cm_s:Q", scale=y_scale), tooltip=tooltip)
+    )
+if scenario:
+    sc = pd.DataFrame([{"o2": scenario["oxygen_vol_pct"], "flow": scenario["airflow_start_cm_s"],
+                        "label": "Your scenario"}])
+    end_flow = scenario.get("airflow_end_cm_s")
+    if end_flow is not None and abs(end_flow - scenario["airflow_start_cm_s"]) > 1e-9:
+        seg = pd.DataFrame([{"o2": scenario["oxygen_vol_pct"], "f0": scenario["airflow_start_cm_s"], "f1": end_flow}])
+        layers.append(alt.Chart(seg).mark_rule(color="#FFFFFF", strokeDash=[3, 3], strokeWidth=1.5).encode(
+            x="o2:Q", y=alt.Y("f0:Q", scale=y_scale), y2="f1:Q"))
+        layers.append(alt.Chart(seg).mark_point(shape="cross", size=200, strokeWidth=2, filled=False,
+                                               color="#FFFFFF").encode(x="o2:Q", y=alt.Y("f1:Q", scale=y_scale)))
+    layers.append(
+        alt.Chart(sc).mark_point(shape="cross", size=260, strokeWidth=3, color="#FFFFFF").encode(
+            x="o2:Q", y=alt.Y("flow:Q", scale=y_scale),
+            tooltip=[alt.Tooltip("label:N", title=""), alt.Tooltip("o2:Q", title="O₂ (vol. %)"),
+                     alt.Tooltip("flow:Q", title="Airflow (cm/s)")],
         )
-    if scenario:
-        sc = pd.DataFrame([{"o2": scenario["oxygen_vol_pct"], "flow": scenario["airflow_start_cm_s"],
-                            "label": "Your scenario"}])
-        end_flow = scenario.get("airflow_end_cm_s")
-        if end_flow is not None and abs(end_flow - scenario["airflow_start_cm_s"]) > 1e-9:
-            seg = pd.DataFrame([{"o2": scenario["oxygen_vol_pct"], "f0": scenario["airflow_start_cm_s"], "f1": end_flow}])
-            layers.append(alt.Chart(seg).mark_rule(color="#FFFFFF", strokeDash=[3, 3], strokeWidth=1.5).encode(
-                x="o2:Q", y=alt.Y("f0:Q", scale=y_scale), y2="f1:Q"))
-            layers.append(alt.Chart(seg).mark_point(shape="cross", size=200, strokeWidth=2, filled=False,
-                                                   color="#FFFFFF").encode(x="o2:Q", y=alt.Y("f1:Q", scale=y_scale)))
-        layers.append(
-            alt.Chart(sc).mark_point(shape="cross", size=260, strokeWidth=3, color="#FFFFFF").encode(
-                x="o2:Q", y=alt.Y("flow:Q", scale=y_scale),
-                tooltip=[alt.Tooltip("label:N", title=""), alt.Tooltip("o2:Q", title="O₂ (vol. %)"),
-                         alt.Tooltip("flow:Q", title="Airflow (cm/s)")],
-            )
-        )
-    return dl_style(alt.layer(*layers).properties(height=430))
-
+    )
+return dl_style(alt.layer(*layers).properties(height=430))
 
 BADGE = {"Covered": "direct", "Partial": "partial", "Outside": "outside", "Not reported": "documentary"}
 
 LAB_MATERIALS = [
-    "SIBAL fabric (75% cotton / 25% fiberglass)",
-    "Other cotton / fiberglass blend",
-    "Silicone",
-    "PMMA",
-    "Nomex",
-    "Kapton",
-    "Teflon",
-    "Other material",
+"SIBAL fabric (75% cotton / 25% fiberglass)",
+"Other cotton / fiberglass blend",
+"Silicone",
+"PMMA",
+"Nomex",
+"Kapton",
+"Teflon",
+"Other material",
 ]
 SAFFIRE_MATERIAL_KEY = {
-    "SIBAL fabric (75% cotton / 25% fiberglass)": "Cotton / fiberglass",
-    "Other cotton / fiberglass blend": "Cotton / fiberglass",
-    "Silicone": "Silicone",
-    "PMMA": "PMMA and Nomex composite",
-    "Nomex": "PMMA and Nomex composite",
+"SIBAL fabric (75% cotton / 25% fiberglass)": "Cotton / fiberglass",
+"Other cotton / fiberglass blend": "Cotton / fiberglass",
+"Silicone": "Silicone",
+"PMMA": "PMMA and Nomex composite",
+"Nomex": "PMMA and Nomex composite",
 }
 SAME_MATERIAL_KEY = {"Kapton": "Kapton", "Teflon": "Teflon", "Silicone": "Silicone"}
 
-
 def lab_row(variable, value, tested, status, message, action) -> dict:
-    return {"variable": variable, "value": value, "tested": tested, "status": status,
-            "message": message, "action": action}
-
+return {"variable": variable, "value": value, "tested": tested, "status": status,
+"message": message, "action": action}
 
 def assess_spread_scenario(tests: pd.DataFrame, s: dict) -> list[dict]:
-    o2_vals = tests["oxygen_vol_pct"].dropna()
-    o2_lo, o2_hi = float(o2_vals.min()), float(o2_vals.max())
-    flows = pd.concat([tests["airflow_start_cm_s"], tests["airflow_end_cm_s"]]).dropna()
-    f_lo, f_hi = float(flows.min()), float(flows.max())
-    widths = sorted(tests["sample_width_cm"].dropna().unique())
-    rows = []
+o2_vals = tests["oxygen_vol_pct"].dropna()
+o2_lo, o2_hi = float(o2_vals.min()), float(o2_vals.max())
+flows = pd.concat([tests["airflow_start_cm_s"], tests["airflow_end_cm_s"]]).dropna()
+f_lo, f_hi = float(flows.min()), float(flows.max())
+widths = sorted(tests["sample_width_cm"].dropna().unique())
+rows = []
 
-    mat = s["material"]
-    if mat == LAB_MATERIALS[0]:
-        rows.append(lab_row("Material", "SIBAL fabric", "SIBAL 75% cotton / 25% fiberglass", "Covered",
-                            "Same fabric as the BASS-II subset.", "None."))
-    elif mat == LAB_MATERIALS[1]:
-        rows.append(lab_row("Material", "Other cotton / fiberglass blend", "SIBAL 75/25 only", "Partial",
-                            "Related composition, but a different blend can burn differently.",
-                            "Characterize your blend and compare it with SIBAL before reusing these results."))
-    else:
-        rows.append(lab_row("Material", mat, "SIBAL 75/25 only", "Outside",
-                            "There is no defensible transfer between materials in BASS-II.",
-                            "Request tests of your actual material. Related larger-scale evidence is listed below if it exists."))
+mat = s["material"]
+if mat == LAB_MATERIALS[0]:
+    rows.append(lab_row("Material", "SIBAL fabric", "SIBAL 75% cotton / 25% fiberglass", "Covered",
+                        "Same fabric as the BASS-II subset.", "None."))
+elif mat == LAB_MATERIALS[1]:
+    rows.append(lab_row("Material", "Other cotton / fiberglass blend", "SIBAL 75/25 only", "Partial",
+                        "Related composition, but a different blend can burn differently.",
+                        "Characterize your blend and compare it with SIBAL before reusing these results."))
+else:
+    rows.append(lab_row("Material", mat, "SIBAL 75/25 only", "Outside",
+                        "There is no defensible transfer between materials in BASS-II.",
+                        "Request tests of your actual material. Related larger-scale evidence is listed below if it exists."))
 
-    rows.append(
-        lab_row("Geometry", s["geometry"], "Flat sheet, 0.32 mm, 10 cm exposed",
-                "Covered" if s["geometry"] == "Flat fabric sheet" else "Outside",
-                "Heat and mass transfer match the tested sheet." if s["geometry"] == "Flat fabric sheet"
-                else "A rod, cylinder, or thick plate is not equivalent to a thin sheet.",
-                "None." if s["geometry"] == "Flat fabric sheet" else "Test the real configuration.")
-    )
+rows.append(
+    lab_row("Geometry", s["geometry"], "Flat sheet, 0.32 mm, 10 cm exposed",
+            "Covered" if s["geometry"] == "Flat fabric sheet" else "Outside",
+            "Heat and mass transfer match the tested sheet." if s["geometry"] == "Flat fabric sheet"
+            else "A rod, cylinder, or thick plate is not equivalent to a thin sheet.",
+            "None." if s["geometry"] == "Flat fabric sheet" else "Test the real configuration.")
+)
 
-    t = s["thickness_mm"]
-    t_ref = float(tests["thickness_mm"].dropna().iloc[0])
-    if abs(t - t_ref) < 1e-6:
-        st_t, msg_t = "Covered", "Matches the tested thickness."
-    elif abs(t - t_ref) / t_ref <= 0.25:
-        st_t, msg_t = "Partial", "Close to the tested thickness, but not tested at this value."
-    else:
-        st_t, msg_t = "Outside", "Thickness is not comparable with the tested sheet."
-    rows.append(lab_row("Thickness", f"{t:g} mm", f"{t_ref:g} mm", st_t, msg_t,
-                        "None." if st_t == "Covered" else "Test your thickness; do not scale from 0.32 mm."))
+t = s["thickness_mm"]
+t_ref = float(tests["thickness_mm"].dropna().iloc[0])
+if abs(t - t_ref) < 1e-6:
+    st_t, msg_t = "Covered", "Matches the tested thickness."
+elif abs(t - t_ref) / t_ref <= 0.25:
+    st_t, msg_t = "Partial", "Close to the tested thickness, but not tested at this value."
+else:
+    st_t, msg_t = "Outside", "Thickness is not comparable with the tested sheet."
+rows.append(lab_row("Thickness", f"{t:g} mm", f"{t_ref:g} mm", st_t, msg_t,
+                    "None." if st_t == "Covered" else "Test your thickness; do not scale from 0.32 mm."))
 
-    w = s["width_cm"]
-    if any(abs(w - v) < 1e-9 for v in widths):
-        st_w, msg_w, act_w = "Covered", "A tested width.", "None."
-    elif min(widths) < w < max(widths):
-        st_w, msg_w, act_w = ("Partial", "Between the two tested widths. The flammable domain differs by width.",
-                              "Do not interpolate without validation.")
-    else:
-        st_w, msg_w, act_w = "Outside", "Outside the tested widths.", "Test your width."
-    rows.append(lab_row("Sample width", f"{w:g} cm", " or ".join(f"{v:g}" for v in widths) + " cm",
-                        st_w, msg_w, act_w))
+w = s["width_cm"]
+if any(abs(w - v) < 1e-9 for v in widths):
+    st_w, msg_w, act_w = "Covered", "A tested width.", "None."
+elif min(widths) < w < max(widths):
+    st_w, msg_w, act_w = ("Partial", "Between the two tested widths. The flammable domain differs by width.",
+                          "Do not interpolate without validation.")
+else:
+    st_w, msg_w, act_w = "Outside", "Outside the tested widths.", "Test your width."
+rows.append(lab_row("Sample width", f"{w:g} cm", " or ".join(f"{v:g}" for v in widths) + " cm",
+                    st_w, msg_w, act_w))
 
-    o2 = s["oxygen"]
-    same_o2 = tests[(tests["oxygen_vol_pct"] - o2).abs() < 0.05]
-    if o2 < o2_lo or o2 > o2_hi:
-        st_o, msg_o, act_o = ("Outside", "Oxygen is outside the observed range.",
-                              "Do not estimate. Design a controlled test at this oxygen level.")
-    elif len(same_o2):
-        st_o, msg_o, act_o = "Covered", f"{len(same_o2)} test(s) at this oxygen level.", "None."
-        if (same_o2["oxygen_caveat"] == "Yes").any():
-            msg_o += " NASA flags the O₂ reading in some of them as possibly inaccurate."
-    else:
-        st_o, msg_o, act_o = ("Partial", "Inside the range, but no test was run at this exact value.",
-                              "Compare the nearest tests; do not interpolate an outcome.")
-    rows.append(lab_row("Oxygen", f"{o2:g} vol. %", f"{o2_lo:g}–{o2_hi:g} vol. %", st_o, msg_o, act_o))
+o2 = s["oxygen"]
+same_o2 = tests[(tests["oxygen_vol_pct"] - o2).abs() < 0.05]
+if o2 < o2_lo or o2 > o2_hi:
+    st_o, msg_o, act_o = ("Outside", "Oxygen is outside the observed range.",
+                          "Do not estimate. Design a controlled test at this oxygen level.")
+elif len(same_o2):
+    st_o, msg_o, act_o = "Covered", f"{len(same_o2)} test(s) at this oxygen level.", "None."
+    if (same_o2["oxygen_caveat"] == "Yes").any():
+        msg_o += " NASA flags the O₂ reading in some of them as possibly inaccurate."
+else:
+    st_o, msg_o, act_o = ("Partial", "Inside the range, but no test was run at this exact value.",
+                          "Compare the nearest tests; do not interpolate an outcome.")
+rows.append(lab_row("Oxygen", f"{o2:g} vol. %", f"{o2_lo:g}–{o2_hi:g} vol. %", st_o, msg_o, act_o))
 
-    p = s["pressure_atm"]
-    rows.append(lab_row("Total pressure", f"{p:g} atm", "1 atm", "Covered" if abs(p - 1) < 1e-9 else "Outside",
-                        "Matches the tested pressure." if abs(p - 1) < 1e-9
-                        else "The subset has no reduced-pressure tests. Pressure is separate from oxygen percentage.",
-                        "None." if abs(p - 1) < 1e-9 else "Look for or run a test at this pressure."))
+p = s["pressure_atm"]
+rows.append(lab_row("Total pressure", f"{p:g} atm", "1 atm", "Covered" if abs(p - 1) < 1e-9 else "Outside",
+                    "Matches the tested pressure." if abs(p - 1) < 1e-9
+                    else "The subset has no reduced-pressure tests. Pressure is separate from oxygen percentage.",
+                    "None." if abs(p - 1) < 1e-9 else "Look for or run a test at this pressure."))
 
-    g_ok = s["gravity"] == "Microgravity (ISS)"
-    rows.append(lab_row("Gravity", s["gravity"], "Microgravity (ISS)", "Covered" if g_ok else "Outside",
-                        "Matches the ISS microgravity tests." if g_ok
-                        else "ISS results do not transfer to Lunar, Martian, or Earth gravity. PSI has no partial-gravity data here.",
-                        "None." if g_ok else "Show as an evidence gap; a partial-gravity test is required."))
+g_ok = s["gravity"] == "Microgravity (ISS)"
+rows.append(lab_row("Gravity", s["gravity"], "Microgravity (ISS)", "Covered" if g_ok else "Outside",
+                    "Matches the ISS microgravity tests." if g_ok
+                    else "ISS results do not transfer to Lunar, Martian, or Earth gravity. PSI has no partial-gravity data here.",
+                    "None." if g_ok else "Show as an evidence gap; a partial-gravity test is required."))
 
-    d_ok = s["direction"] == "Concurrent"
-    rows.append(lab_row("Flow direction", s["direction"], "Concurrent", "Covered" if d_ok else "Outside",
-                        "Same direction as the tests." if d_ok
-                        else "Flow direction changes the spread mechanism.",
-                        "None." if d_ok else "Use a different experimental subset."))
+d_ok = s["direction"] == "Concurrent"
+rows.append(lab_row("Flow direction", s["direction"], "Concurrent", "Covered" if d_ok else "Outside",
+                    "Same direction as the tests." if d_ok
+                    else "Flow direction changes the spread mechanism.",
+                    "None." if d_ok else "Use a different experimental subset."))
 
-    fs, fe = s["flow_start"], s["flow_end"]
-    profile = "Constant" if abs(fs - fe) < 1e-9 else ("Decreasing" if fe < fs else "Increasing")
-    exact_flow = tests[(tests["airflow_start_cm_s"] - fs).abs().lt(1e-9) & (tests["airflow_end_cm_s"] - fe).abs().lt(1e-9)]
-    in_range = f_lo <= min(fs, fe) and max(fs, fe) <= f_hi
-    if not in_range:
-        st_f, msg_f, act_f = ("Outside", "Airflow is outside the observed range.",
-                              "Do not extrapolate; evaluate several controlled points.")
-    elif len(exact_flow):
-        st_f, msg_f, act_f = "Covered", f"{len(exact_flow)} test(s) with this {profile.lower()} profile.", "None."
-    else:
-        st_f, msg_f, act_f = ("Partial", "Both values are in range, but this start → end profile was not tested.",
-                              "Compare whole profiles, not a single number; airflow has no universal monotonic effect.")
-    rows.append(lab_row("Airflow", f"{fs:g} → {fe:g} cm/s ({profile.lower()})", f"{f_lo:g}–{f_hi:g} cm/s profiles",
-                        st_f, msg_f, act_f))
+fs, fe = s["flow_start"], s["flow_end"]
+profile = "Constant" if abs(fs - fe) < 1e-9 else ("Decreasing" if fe < fs else "Increasing")
+exact_flow = tests[(tests["airflow_start_cm_s"] - fs).abs().lt(1e-9) & (tests["airflow_end_cm_s"] - fe).abs().lt(1e-9)]
+in_range = f_lo <= min(fs, fe) and max(fs, fe) <= f_hi
+if not in_range:
+    st_f, msg_f, act_f = ("Outside", "Airflow is outside the observed range.",
+                          "Do not extrapolate; evaluate several controlled points.")
+elif len(exact_flow):
+    st_f, msg_f, act_f = "Covered", f"{len(exact_flow)} test(s) with this {profile.lower()} profile.", "None."
+else:
+    st_f, msg_f, act_f = ("Partial", "Both values are in range, but this start → end profile was not tested.",
+                          "Compare whole profiles, not a single number; airflow has no universal monotonic effect.")
+rows.append(lab_row("Airflow", f"{fs:g} → {fe:g} cm/s ({profile.lower()})", f"{f_lo:g}–{f_hi:g} cm/s profiles",
+                    st_f, msg_f, act_f))
 
-    if s["reused"]:
-        rows.append(lab_row("Sample condition", "Reused sample", "New samples", "Partial",
-                            "Thermal history and shorter unburned length reduce comparability.",
-                            "Use only as context; prefer new samples."))
-    else:
-        rows.append(lab_row("Sample condition", "New sample", "New samples", "Covered", "Comparable.", "None."))
-    return rows
-
+if s["reused"]:
+    rows.append(lab_row("Sample condition", "Reused sample", "New samples", "Partial",
+                        "Thermal history and shorter unburned length reduce comparability.",
+                        "Use only as context; prefer new samples."))
+else:
+    rows.append(lab_row("Sample condition", "New sample", "New samples", "Covered", "Comparable.", "None."))
+return rows
 
 def lab_verdict(rows: list[dict], direct: pd.DataFrame, spread: bool = True) -> tuple[str, str, str]:
-    statuses = [r["status"] for r in rows]
-    if "Outside" in statuses:
-        outs = ", ".join(r["variable"].lower() for r in rows if r["status"] == "Outside")
-        return ("Outside", "Outside the tested domain",
-                f"These conditions are not represented in the PSI subset Q’AQ’ Lab holds: {outs}. "
-                "The tests below can inform mechanisms at most; they cannot support conclusions for your scenario.")
-    if "Partial" in statuses or direct.empty:
-        return ("Partial", "Partial coverage",
-                "Some conditions match, but this exact combination was not tested. Review the nearest tests and "
-                "the differences, and treat them as comparisons rather than predictions.")
-    return ("Covered", "Directly represented",
-            "At least one test matches every condition you entered. That gives documented outcomes for those "
-            "conditions, not a probability" + (", and the source table does not label sustained spread." if spread
-            else ". Particle size is not toxicity or detector performance."))
-
+statuses = [r["status"] for r in rows]
+if "Outside" in statuses:
+outs = ", ".join(r["variable"].lower() for r in rows if r["status"] == "Outside")
+return ("Outside", "Outside the tested domain",
+f"These conditions are not represented in the PSI subset Q’AQ’ Lab holds: {outs}. "
+"The tests below can inform mechanisms at most; they cannot support conclusions for your scenario.")
+if "Partial" in statuses or direct.empty:
+return ("Partial", "Partial coverage",
+"Some conditions match, but this exact combination was not tested. Review the nearest tests and "
+"the differences, and treat them as comparisons rather than predictions.")
+return ("Covered", "Directly represented",
+"At least one test matches every condition you entered. That gives documented outcomes for those "
+"conditions, not a probability" + (", and the source table does not label sustained spread." if spread
+else ". Particle size is not toxicity or detector performance."))
 
 def lab_ruler_chart(tests: pd.DataFrame, s: dict):
-    import altair as alt
+import altair as alt
 
-    flows = pd.concat([tests["airflow_start_cm_s"], tests["airflow_end_cm_s"]])
-    items = [
-        ("Oxygen (vol. %)", tests["oxygen_vol_pct"].min(), tests["oxygen_vol_pct"].max(), s["oxygen"]),
-        ("Airflow start (cm/s)", flows.min(), flows.max(), s["flow_start"]),
-        ("Airflow end (cm/s)", flows.min(), flows.max(), s["flow_end"]),
-        ("Width (cm)", tests["sample_width_cm"].min(), tests["sample_width_cm"].max(), s["width_cm"]),
-    ]
-    charts = []
-    for label, lo, hi, val in items:
-        inside = lo <= val <= hi
-        pad = (hi - lo) * 0.35 or 1.0
-        dom = [min(lo, val) - pad * 0.2, max(hi, val) + pad * 0.2]
-        df = pd.DataFrame([{"lo": float(lo), "hi": float(hi), "val": float(val),
-                            "state": "Inside tested range" if inside else "Outside tested range"}])
-        x = alt.X("lo:Q", scale=alt.Scale(domain=dom, zero=False, nice=False), title=None)
-        band = alt.Chart(df).mark_bar(height=14, color="#78C8C3", opacity=0.35, cornerRadius=7).encode(
-            x=x, x2="hi:Q")
-        mark = alt.Chart(df).mark_point(shape="diamond", size=190, filled=True, stroke="#090909",
-                                        strokeWidth=1.5).encode(
-            x=alt.X("val:Q", scale=alt.Scale(domain=dom, zero=False, nice=False)),
-            color=alt.Color("state:N", scale=alt.Scale(
-                domain=["Inside tested range", "Outside tested range"], range=["#F25C05", "#D89595"]),
-                legend=None),
-            tooltip=[alt.Tooltip("val:Q", title="Your value"), alt.Tooltip("lo:Q", title="Tested min"),
-                     alt.Tooltip("hi:Q", title="Tested max")],
-        )
-        charts.append(alt.layer(band, mark).properties(height=46, title=label))
-    return dl_style(alt.vconcat(*charts).resolve_scale(x="independent"))
-
+flows = pd.concat([tests["airflow_start_cm_s"], tests["airflow_end_cm_s"]])
+items = [
+    ("Oxygen (vol. %)", tests["oxygen_vol_pct"].min(), tests["oxygen_vol_pct"].max(), s["oxygen"]),
+    ("Airflow start (cm/s)", flows.min(), flows.max(), s["flow_start"]),
+    ("Airflow end (cm/s)", flows.min(), flows.max(), s["flow_end"]),
+    ("Width (cm)", tests["sample_width_cm"].min(), tests["sample_width_cm"].max(), s["width_cm"]),
+]
+charts = []
+for label, lo, hi, val in items:
+    inside = lo <= val <= hi
+    pad = (hi - lo) * 0.35 or 1.0
+    dom = [min(lo, val) - pad * 0.2, max(hi, val) + pad * 0.2]
+    df = pd.DataFrame([{"lo": float(lo), "hi": float(hi), "val": float(val),
+                        "state": "Inside tested range" if inside else "Outside tested range"}])
+    x = alt.X("lo:Q", scale=alt.Scale(domain=dom, zero=False, nice=False), title=None)
+    band = alt.Chart(df).mark_bar(height=14, color="#78C8C3", opacity=0.35, cornerRadius=7).encode(
+        x=x, x2="hi:Q")
+    mark = alt.Chart(df).mark_point(shape="diamond", size=190, filled=True, stroke="#090909",
+                                    strokeWidth=1.5).encode(
+        x=alt.X("val:Q", scale=alt.Scale(domain=dom, zero=False, nice=False)),
+        color=alt.Color("state:N", scale=alt.Scale(
+            domain=["Inside tested range", "Outside tested range"], range=["#F25C05", "#D89595"]),
+            legend=None),
+        tooltip=[alt.Tooltip("val:Q", title="Your value"), alt.Tooltip("lo:Q", title="Tested min"),
+                 alt.Tooltip("hi:Q", title="Tested max")],
+    )
+    charts.append(alt.layer(band, mark).properties(height=46, title=label))
+return dl_style(alt.vconcat(*charts).resolve_scale(x="independent"))
 
 def render_spread_lab(tests: pd.DataFrame) -> None:
+st.markdown(
+'<div class="em"><div class="question-intro"><h2>Describe your experiment</h2>'
+'<p>Enter the conditions you plan to use. Q’AQ’ Lab compares each one with the tested domain and finds the '
+'closest PSI tests. It judges how well the evidence covers your conditions, not whether they are safe.</p>'
+'</div></div>', unsafe_allow_html=True)
+
+a, b, c = st.columns(3)
+with a:
+    material = st.selectbox("Material", LAB_MATERIALS, key="lab_material")
+    geometry = st.selectbox("Geometry", ["Flat fabric sheet", "Rod or cylinder", "Thick plate", "Other"],
+                            key="lab_geometry")
+    thickness = st.number_input("Thickness (mm)", 0.01, 50.0, 0.32, 0.01, key="lab_thick")
+    width = st.number_input("Sample width (cm)", 0.1, 100.0, 2.2, 0.1, key="lab_width")
+with b:
+    oxygen = st.number_input("Oxygen (vol. %)", 0.0, 100.0, 18.7, 0.1, key="lab_o2")
+    pressure = st.number_input("Total pressure (atm)", 0.1, 5.0, 1.0, 0.05, key="lab_p")
+    gravity = st.selectbox("Gravity", ["Microgravity (ISS)", "Lunar (1/6 g)", "Martian (0.38 g)", "Earth (1 g)"],
+                           key="lab_g")
+    reused = st.checkbox("Sample was already used in a previous test", key="lab_reused")
+with c:
+    direction = st.selectbox("Flow direction", ["Concurrent", "Opposed", "Not defined"], key="lab_dir")
+    flow_start = st.number_input("Airflow at start (cm/s)", 0.0, 500.0, 10.0, 0.5, key="lab_fs")
+    flow_end = st.number_input("Airflow at end (cm/s)", 0.0, 500.0, 2.2, 0.1, key="lab_fe")
+    st.caption("Use the same value twice for constant airflow.")
+
+s = {"material": material, "geometry": geometry, "thickness_mm": thickness, "width_cm": width,
+     "oxygen": oxygen, "pressure_atm": pressure, "gravity": gravity, "reused": reused,
+     "direction": direction, "flow_start": flow_start, "flow_end": flow_end}
+
+rows = assess_spread_scenario(tests, s)
+profile = "Constant" if abs(flow_start - flow_end) < 1e-9 else ("Decreasing" if flow_end < flow_start else "Increasing")
+query = {"oxygen_vol_pct": oxygen, "airflow_start_cm_s": flow_start, "airflow_end_cm_s": flow_end,
+         "sample_width_cm": width, "airflow_profile": profile,
+         "reused_sample": "Yes" if reused else "No"}
+direct = tests[
+    (tests["oxygen_vol_pct"] - oxygen).abs().lt(0.05)
+    & (tests["airflow_start_cm_s"] - flow_start).abs().lt(1e-9)
+    & (tests["airflow_end_cm_s"] - flow_end).abs().lt(1e-9)
+    & (tests["sample_width_cm"] - width).abs().lt(1e-9)
+    & (tests["reused_sample"] == query["reused_sample"])
+]
+ranked = rank_evidence_records(tests, query)
+top = ranked.head(3)
+status, title, text = lab_verdict(rows, direct)
+n_cov = sum(r["status"] == "Covered" for r in rows)
+gaps = [r for r in rows if r["status"] in ("Outside", "Partial")]
+closest_case = str(top.iloc[0]["test_id"]) if not top.empty else "No comparable case"
+labeled_targets, model_ready = ml_readiness_counts(tests)
+
+audit_summary = "".join([
+    dl_stat("Evidence boundary", title, "Covered, partial, or outside the tested domain"),
+    dl_stat("Condition coverage", f"{n_cov}/{len(rows)} directly covered", "Audited condition by condition"),
+    dl_stat("Closest NASA case", closest_case, "Differences remain visible below"),
+    dl_stat(
+        "ML readiness",
+        f"{model_ready}/{len(tests)} eligible targets",
+        f"{labeled_targets} records contain a sustained-spread label",
+    ),
+])
+st.markdown(
+    f'<div class="em"><div class="evidence-summary">{audit_summary}</div></div>',
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    '<div class="em"><div class="result-explanation" style="margin-top:22px">'
+    f'<span class="coverage-badge {BADGE[status]}">{escape(title)}</span>'
+    f'<h3 style="margin-top:14px">Evidence Readiness Audit · {n_cov} of {len(rows)} conditions directly covered</h3>'
+    f'<p>{escape(text)}</p></div></div>', unsafe_allow_html=True)
+
+with st.expander("How the explainable hybrid SI calculated this audit"):
     st.markdown(
-        '<div class="em"><div class="question-intro"><h2>Describe your experiment</h2>'
-        '<p>Enter the conditions you plan to use. Q’AQ’ Lab compares each one with the tested domain and finds the '
-        'closest PSI tests. It judges how well the evidence covers your conditions, not whether they are safe.</p>'
-        '</div></div>', unsafe_allow_html=True)
+        """
+        1. **Structure:** the proposed experiment is converted into a consistent set of conditions.
+        2. **Retrieve:** BASS-II/SIBAL cases are ordered by exact matches, missing fields, and normalized distance across oxygen, airflow, width, profile, and sample condition.
+        3. **Reason:** scientific expert rules audit material, geometry, thickness, width, oxygen, pressure, gravity, flow direction, airflow, and sample history.
+        4. **Act or abstain:** any unsupported condition is exposed and converted into a testing requirement; no fire probability is generated without a defensible target label.
 
-    a, b, c = st.columns(3)
-    with a:
-        material = st.selectbox("Material", LAB_MATERIALS, key="lab_material")
-        geometry = st.selectbox("Geometry", ["Flat fabric sheet", "Rod or cylinder", "Thick plate", "Other"],
-                                key="lab_geometry")
-        thickness = st.number_input("Thickness (mm)", 0.01, 50.0, 0.32, 0.01, key="lab_thick")
-        width = st.number_input("Sample width (cm)", 0.1, 100.0, 2.2, 0.1, key="lab_width")
-    with b:
-        oxygen = st.number_input("Oxygen (vol. %)", 0.0, 100.0, 18.7, 0.1, key="lab_o2")
-        pressure = st.number_input("Total pressure (atm)", 0.1, 5.0, 1.0, 0.05, key="lab_p")
-        gravity = st.selectbox("Gravity", ["Microgravity (ISS)", "Lunar (1/6 g)", "Martian (0.38 g)", "Earth (1 g)"],
-                               key="lab_g")
-        reused = st.checkbox("Sample was already used in a previous test", key="lab_reused")
-    with c:
-        direction = st.selectbox("Flow direction", ["Concurrent", "Opposed", "Not defined"], key="lab_dir")
-        flow_start = st.number_input("Airflow at start (cm/s)", 0.0, 500.0, 10.0, 0.5, key="lab_fs")
-        flow_end = st.number_input("Airflow at end (cm/s)", 0.0, 500.0, 2.2, 0.1, key="lab_fe")
-        st.caption("Use the same value twice for constant airflow.")
-
-    s = {"material": material, "geometry": geometry, "thickness_mm": thickness, "width_cm": width,
-         "oxygen": oxygen, "pressure_atm": pressure, "gravity": gravity, "reused": reused,
-         "direction": direction, "flow_start": flow_start, "flow_end": flow_end}
-
-    rows = assess_spread_scenario(tests, s)
-    profile = "Constant" if abs(flow_start - flow_end) < 1e-9 else ("Decreasing" if flow_end < flow_start else "Increasing")
-    query = {"oxygen_vol_pct": oxygen, "airflow_start_cm_s": flow_start, "airflow_end_cm_s": flow_end,
-             "sample_width_cm": width, "airflow_profile": profile,
-             "reused_sample": "Yes" if reused else "No"}
-    direct = tests[
-        (tests["oxygen_vol_pct"] - oxygen).abs().lt(0.05)
-        & (tests["airflow_start_cm_s"] - flow_start).abs().lt(1e-9)
-        & (tests["airflow_end_cm_s"] - flow_end).abs().lt(1e-9)
-        & (tests["sample_width_cm"] - width).abs().lt(1e-9)
-        & (tests["reused_sample"] == query["reused_sample"])
-    ]
-    ranked = rank_evidence_records(tests, query)
-    top = ranked.head(3)
-    status, title, text = lab_verdict(rows, direct)
-    n_cov = sum(r["status"] == "Covered" for r in rows)
-    gaps = [r for r in rows if r["status"] in ("Outside", "Partial")]
-    closest_case = str(top.iloc[0]["test_id"]) if not top.empty else "No comparable case"
-    labeled_targets, model_ready = ml_readiness_counts(tests)
-
-    audit_summary = "".join([
-        dl_stat("Evidence boundary", title, "Covered, partial, or outside the tested domain"),
-        dl_stat("Condition coverage", f"{n_cov}/{len(rows)} directly covered", "Audited condition by condition"),
-        dl_stat("Closest NASA case", closest_case, "Differences remain visible below"),
-        dl_stat(
-            "ML readiness",
-            f"{model_ready}/{len(tests)} eligible targets",
-            f"{labeled_targets} records contain a sustained-spread label",
-        ),
-    ])
-    st.markdown(
-        f'<div class="em"><div class="evidence-summary">{audit_summary}</div></div>',
-        unsafe_allow_html=True,
+        The same inputs always produce the same audit trail. Every displayed case remains linked to its NASA report table and page.
+        """
     )
 
-    st.markdown(
-        '<div class="em"><div class="result-explanation" style="margin-top:22px">'
-        f'<span class="coverage-badge {BADGE[status]}">{escape(title)}</span>'
-        f'<h3 style="margin-top:14px">Evidence Readiness Audit · {n_cov} of {len(rows)} conditions directly covered</h3>'
-        f'<p>{escape(text)}</p></div></div>', unsafe_allow_html=True)
+# Per-variable table
+body = "".join(
+    f'<tr><td><strong>{escape(r["variable"])}</strong></td><td>{escape(r["value"])}</td>'
+    f'<td>{escape(r["tested"])}</td>'
+    f'<td><span class="coverage-badge {BADGE[r["status"]]}">{escape(r["status"])}</span></td>'
+    f'<td>{escape(r["message"])}</td></tr>' for r in rows)
+st.markdown(
+    '<div class="em"><table class="assess"><thead><tr><th>Condition</th><th>Your value</th>'
+    '<th>Tested in PSI subset</th><th>Status</th><th>What it means</th></tr></thead>'
+    f'<tbody>{body}</tbody></table></div>', unsafe_allow_html=True)
 
-    with st.expander("How the explainable hybrid SI calculated this audit"):
-        st.markdown(
-            """
-            1. **Structure:** the proposed experiment is converted into a consistent set of conditions.
-            2. **Retrieve:** BASS-II/SIBAL cases are ordered by exact matches, missing fields, and normalized distance across oxygen, airflow, width, profile, and sample condition.
-            3. **Reason:** scientific expert rules audit material, geometry, thickness, width, oxygen, pressure, gravity, flow direction, airflow, and sample history.
-            4. **Act or abstain:** any unsupported condition is exposed and converted into a testing requirement; no fire probability is generated without a defensible target label.
-
-            The same inputs always produce the same audit trail. Every displayed case remains linked to its NASA report table and page.
-            """
-        )
-
-    # Per-variable table
-    body = "".join(
-        f'<tr><td><strong>{escape(r["variable"])}</strong></td><td>{escape(r["value"])}</td>'
-        f'<td>{escape(r["tested"])}</td>'
-        f'<td><span class="coverage-badge {BADGE[r["status"]]}">{escape(r["status"])}</span></td>'
-        f'<td>{escape(r["message"])}</td></tr>' for r in rows)
-    st.markdown(
-        '<div class="em"><table class="assess"><thead><tr><th>Condition</th><th>Your value</th>'
-        '<th>Tested in PSI subset</th><th>Status</th><th>What it means</th></tr></thead>'
-        f'<tbody>{body}</tbody></table></div>', unsafe_allow_html=True)
-
-    # Charts
-    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Where your conditions fall</h2>'
-                '<p>Left: your value against the tested range for each numeric condition. Right: your scenario '
-                'among the real tests; the white cross is your start, the open cross your end airflow.</p></div></div>',
-                unsafe_allow_html=True)
-    envelope = {
-        "o2_lo": float(tests["oxygen_vol_pct"].min()), "o2_hi": float(tests["oxygen_vol_pct"].max()),
-        "flow_lo": float(min(tests["airflow_start_cm_s"].min(), tests["airflow_end_cm_s"].min())),
-        "flow_hi": float(max(tests["airflow_start_cm_s"].max(), tests["airflow_end_cm_s"].max())),
-    }
-    left, right = st.columns([2, 3])
-    with left:
-        st.altair_chart(lab_ruler_chart(tests, s), width="stretch", theme=None)
-    with right:
-        scenario = {"oxygen_vol_pct": oxygen, "airflow_start_cm_s": flow_start, "airflow_end_cm_s": flow_end}
-        st.altair_chart(bassii_chart(tests, scenario, envelope, highlight=top["test_id"].tolist()),
-                        width="stretch", theme=None)
-    st.caption("Rings mark the three closest tests. Being inside a range does not mean the combination was tested.")
-
-    # Nearest tests
-    material_blocked = rows[0]["status"] == "Outside" or rows[1]["status"] == "Outside"
-    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Closest BASS-II tests</h2>'
-                '<p>Ranked by how many of your conditions match, then by distance. Differences are shown, '
-                'never hidden.</p></div></div>', unsafe_allow_html=True)
-    if material_blocked:
-        st.warning("Your material or geometry is not the one tested in BASS-II/SIBAL, so these tests are not "
-                   "comparable evidence. They are shown only to illustrate how the experiment was run.")
-    for _, row in top.iterrows():
-        matched, different = compare_record_to_query(row, query)
-        chips = "".join(f'<span class="condition-chip">✓ {escape(m)}</span>' for m in matched)
-        diffs = "".join(f'<p class="why">≠ {escape(d)}</p>' for d in different)
-        flag = ""
-        if row["oxygen_caveat"] == "Yes":
-            flag = '<p class="why">⚠ NASA flags this O₂ reading as possibly inaccurate.</p>'
-        st.markdown(
-            f'<div class="em"><div class="match-card"><h3>{escape(row["test_id"])} · {escape(row["observed_outcome"])}</h3>'
-            f'<div class="condition-chips">{chips or "<span class=condition-chip>No condition matches exactly</span>"}</div>'
-            f'{diffs}{flag}'
-            f'<p class="limitation">{escape(str(row["exclusion_reason"]))} · Source: report p. {int(row["source_page"])}, '
-            f'{escape(row["source_table"])}.</p></div></div>', unsafe_allow_html=True)
-
-    # Related evidence: Saffire + historical context
-    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Similar cases in PSI</h2>'
-                '<p>Other investigations with a related material. Different scale and conditions: use them to '
-                'understand, not to transfer numbers.</p></div></div>', unsafe_allow_html=True)
-    key = SAFFIRE_MATERIAL_KEY.get(material)
-    saffire = load_saffire()
-    related = saffire[saffire["material"] == key] if key else saffire.iloc[0:0]
-    if related.empty:
-        st.info("Q’AQ’ Lab has no related larger-scale record for this material. That is an evidence gap, not a "
-                "sign of low risk.")
-    else:
-        view = related[["investigation", "test_id", "material", "flow_cm_s", "flow_direction",
-                        "oxygen_vol_pct", "spread_rate_mm_s", "documented_outcome"]].rename(columns={
-            "investigation": "Study", "test_id": "Test", "material": "Material", "flow_cm_s": "Flow (cm/s)",
-            "flow_direction": "Direction", "oxygen_vol_pct": "O₂ (vol. %)", "spread_rate_mm_s": "Spread (mm/s)",
-            "documented_outcome": "Documented outcome"})
-        st.dataframe(view, hide_index=True, width="stretch")
-        st.caption("Saffire used much larger samples inside the Cygnus vehicle. Compare O₂, flow, and direction "
-                   "with your scenario before drawing any parallel.")
-
-    try:
-        cases = load_accident_cases()
-        linked = cases[cases["related_psi"] == "BASS-II"]
-    except (FileNotFoundError, ValueError):
-        linked = pd.DataFrame()
-    for _, case in linked.iterrows():
-        st.markdown(
-            f'<div class="em"><div class="psi-connection"><h3>Historical context: {escape(case["title"])}</h3>'
-            f'<p>{escape(case["psi_relation_note"])}</p>'
-            f'<p class="evidence-boundary">{escape(case["interpretation_limit"])}</p></div></div>',
+# Charts
+st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Where your conditions fall</h2>'
+            '<p>Left: your value against the tested range for each numeric condition. Right: your scenario '
+            'among the real tests; the white cross is your start, the open cross your end airflow.</p></div></div>',
             unsafe_allow_html=True)
+envelope = {
+    "o2_lo": float(tests["oxygen_vol_pct"].min()), "o2_hi": float(tests["oxygen_vol_pct"].max()),
+    "flow_lo": float(min(tests["airflow_start_cm_s"].min(), tests["airflow_end_cm_s"].min())),
+    "flow_hi": float(max(tests["airflow_start_cm_s"].max(), tests["airflow_end_cm_s"].max())),
+}
+left, right = st.columns([2, 3])
+with left:
+    st.altair_chart(lab_ruler_chart(tests, s), width="stretch", theme=None)
+with right:
+    scenario = {"oxygen_vol_pct": oxygen, "airflow_start_cm_s": flow_start, "airflow_end_cm_s": flow_end}
+    st.altair_chart(bassii_chart(tests, scenario, envelope, highlight=top["test_id"].tolist()),
+                    width="stretch", theme=None)
+st.caption("Rings mark the three closest tests. Being inside a range does not mean the combination was tested.")
 
-    # Next steps + report
-    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Next experiment required</h2>'
-                '<p>Q’AQ’ Lab converts every partial or unsupported condition into an explicit research action.</p>'
-                '</div></div>', unsafe_allow_html=True)
-    if gaps:
-        items = "".join(
-            f'<div class="case-list-item"><strong>{escape(r["variable"])}:</strong> {escape(r["action"])}</div>'
-            for r in gaps)
-        st.markdown(f'<div class="em"><div class="case-list">{items}</div></div>', unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="em"><div class="case-list"><div class="case-list-item">All entered conditions '
-                    'are covered. The remaining gap is a sustained-spread label per test, which requires '
-                    'reviewing PSI videos or files.</div></div></div>', unsafe_allow_html=True)
+# Nearest tests
+material_blocked = rows[0]["status"] == "Outside" or rows[1]["status"] == "Outside"
+st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Closest BASS-II tests</h2>'
+            '<p>Ranked by how many of your conditions match, then by distance. Differences are shown, '
+            'never hidden.</p></div></div>', unsafe_allow_html=True)
+if material_blocked:
+    st.warning("Your material or geometry is not the one tested in BASS-II/SIBAL, so these tests are not "
+               "comparable evidence. They are shown only to illustrate how the experiment was run.")
+for _, row in top.iterrows():
+    matched, different = compare_record_to_query(row, query)
+    chips = "".join(f'<span class="condition-chip">✓ {escape(m)}</span>' for m in matched)
+    diffs = "".join(f'<p class="why">≠ {escape(d)}</p>' for d in different)
+    flag = ""
+    if row["oxygen_caveat"] == "Yes":
+        flag = '<p class="why">⚠ NASA flags this O₂ reading as possibly inaccurate.</p>'
+    st.markdown(
+        f'<div class="em"><div class="match-card"><h3>{escape(row["test_id"])} · {escape(row["observed_outcome"])}</h3>'
+        f'<div class="condition-chips">{chips or "<span class=condition-chip>No condition matches exactly</span>"}</div>'
+        f'{diffs}{flag}'
+        f'<p class="limitation">{escape(str(row["exclusion_reason"]))} · Source: report p. {int(row["source_page"])}, '
+        f'{escape(row["source_table"])}.</p></div></div>', unsafe_allow_html=True)
 
-    report = "\n".join(
-        ["Q’AQ’ Lab Evidence Readiness Audit", f"Verdict: {title}",
-         f"Condition coverage: {n_cov}/{len(rows)}", f"Closest NASA case: {closest_case}",
-         f"ML readiness: {model_ready}/{len(tests)} eligible targets", ""]
-        + [f"- {r['variable']}: {r['value']} | tested: {r['tested']} | {r['status']} | {r['action']}" for r in rows]
-        + ["", "Closest tests: " + ", ".join(top["test_id"]),
-           "Method: case-based retrieval + scientific expert rules + evidence-aware abstention.",
-           "This audit is not a fire probability or safety rating."])
-    st.download_button("Download evidence audit (TXT)", report.encode("utf-8"),
-                       file_name="qaq_lab_evidence_audit.txt", mime="text/plain", key="lab_dl")
+# Related evidence: Saffire + historical context
+st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Similar cases in PSI</h2>'
+            '<p>Other investigations with a related material. Different scale and conditions: use them to '
+            'understand, not to transfer numbers.</p></div></div>', unsafe_allow_html=True)
+key = SAFFIRE_MATERIAL_KEY.get(material)
+saffire = load_saffire()
+related = saffire[saffire["material"] == key] if key else saffire.iloc[0:0]
+if related.empty:
+    st.info("Q’AQ’ Lab has no related larger-scale record for this material. That is an evidence gap, not a "
+            "sign of low risk.")
+else:
+    view = related[["investigation", "test_id", "material", "flow_cm_s", "flow_direction",
+                    "oxygen_vol_pct", "spread_rate_mm_s", "documented_outcome"]].rename(columns={
+        "investigation": "Study", "test_id": "Test", "material": "Material", "flow_cm_s": "Flow (cm/s)",
+        "flow_direction": "Direction", "oxygen_vol_pct": "O₂ (vol. %)", "spread_rate_mm_s": "Spread (mm/s)",
+        "documented_outcome": "Documented outcome"})
+    st.dataframe(view, hide_index=True, width="stretch")
+    st.caption("Saffire used much larger samples inside the Cygnus vehicle. Compare O₂, flow, and direction "
+               "with your scenario before drawing any parallel.")
 
+try:
+    cases = load_accident_cases()
+    linked = cases[cases["related_psi"] == "BASS-II"]
+except (FileNotFoundError, ValueError):
+    linked = pd.DataFrame()
+for _, case in linked.iterrows():
+    st.markdown(
+        f'<div class="em"><div class="psi-connection"><h3>Historical context: {escape(case["title"])}</h3>'
+        f'<p>{escape(case["psi_relation_note"])}</p>'
+        f'<p class="evidence-boundary">{escape(case["interpretation_limit"])}</p></div></div>',
+        unsafe_allow_html=True)
+
+# Next steps + report
+st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Next experiment required</h2>'
+            '<p>Q’AQ’ Lab converts every partial or unsupported condition into an explicit research action.</p>'
+            '</div></div>', unsafe_allow_html=True)
+if gaps:
+    items = "".join(
+        f'<div class="case-list-item"><strong>{escape(r["variable"])}:</strong> {escape(r["action"])}</div>'
+        for r in gaps)
+    st.markdown(f'<div class="em"><div class="case-list">{items}</div></div>', unsafe_allow_html=True)
+else:
+    st.markdown('<div class="em"><div class="case-list"><div class="case-list-item">All entered conditions '
+                'are covered. The remaining gap is a sustained-spread label per test, which requires '
+                'reviewing PSI videos or files.</div></div></div>', unsafe_allow_html=True)
+
+report = "\n".join(
+    ["Q’AQ’ Lab Evidence Readiness Audit", f"Verdict: {title}",
+     f"Condition coverage: {n_cov}/{len(rows)}", f"Closest NASA case: {closest_case}",
+     f"ML readiness: {model_ready}/{len(tests)} eligible targets", ""]
+    + [f"- {r['variable']}: {r['value']} | tested: {r['tested']} | {r['status']} | {r['action']}" for r in rows]
+    + ["", "Closest tests: " + ", ".join(top["test_id"]),
+       "Method: case-based retrieval + scientific expert rules + evidence-aware abstention.",
+       "This audit is not a fire probability or safety rating."])
+st.download_button("Download evidence audit (TXT)", report.encode("utf-8"),
+                   file_name="qaq_lab_evidence_audit.txt", mime="text/plain", key="lab_dl")
 
 def render_smoke_lab() -> None:
-    import altair as alt
+import altair as alt
 
-    sizes = load_same_sizes()
-    st.markdown('<div class="em"><div class="question-intro"><h2>Describe your smoke measurement</h2>'
-                '<p>SAME and SAME-R measured smoke particle size for a few materials in microgravity, at the '
-                'start and after 720 s of ageing.</p></div></div>', unsafe_allow_html=True)
-    a, b, c = st.columns(3)
-    with a:
-        material = st.selectbox("Source material", ["Kapton", "Cotton wick", "Silicone", "Teflon", "Pyrell",
-                                                    "Other material"], key="lab_smoke_mat")
-    with b:
-        age = st.number_input("Aerosol ageing time (s)", 0, 7200, 720, 60, key="lab_smoke_age")
-    with c:
-        gravity = st.selectbox("Gravity", ["Microgravity (ISS)", "Lunar (1/6 g)", "Martian (0.38 g)", "Earth (1 g)"],
-                               key="lab_smoke_g")
+sizes = load_same_sizes()
+st.markdown('<div class="em"><div class="question-intro"><h2>Describe your smoke measurement</h2>'
+            '<p>SAME and SAME-R measured smoke particle size for a few materials in microgravity, at the '
+            'start and after 720 s of ageing.</p></div></div>', unsafe_allow_html=True)
+a, b, c = st.columns(3)
+with a:
+    material = st.selectbox("Source material", ["Kapton", "Cotton wick", "Silicone", "Teflon", "Pyrell",
+                                                "Other material"], key="lab_smoke_mat")
+with b:
+    age = st.number_input("Aerosol ageing time (s)", 0, 7200, 720, 60, key="lab_smoke_age")
+with c:
+    gravity = st.selectbox("Gravity", ["Microgravity (ISS)", "Lunar (1/6 g)", "Martian (0.38 g)", "Earth (1 g)"],
+                           key="lab_smoke_g")
 
-    have = sizes[sizes["material"] == material]
-    rows = []
-    rows.append(lab_row("Material", material, ", ".join(sorted(sizes["material"].unique())),
-                        "Covered" if len(have) else "Outside",
-                        f"Measured in {', '.join(have['study'])}." if len(have) else "No smoke-size data for this material.",
-                        "None." if len(have) else "Request SAME-type measurements for your material."))
-    rows.append(lab_row("Ageing time", f"{age} s", "0 s (base) and 720 s",
-                        "Covered" if age in (0, 720) else ("Partial" if 0 < age < 720 else "Outside"),
-                        "A measured condition." if age in (0, 720) else
-                        ("Between the two measured points; the curve was not measured." if age < 720
-                         else "Longer than any measured ageing."),
-                        "None." if age in (0, 720) else "Do not interpolate; measure at your ageing time."))
-    g_ok = gravity == "Microgravity (ISS)"
-    rows.append(lab_row("Gravity", gravity, "Microgravity (ISS)", "Covered" if g_ok else "Outside",
-                        "Matches the ISS measurements." if g_ok else "Smoke transport and particle behaviour change with gravity.",
-                        "None." if g_ok else "Show as an evidence gap."))
-    status, title, text = lab_verdict(rows, have, spread=False)
-    st.markdown(
-        '<div class="em"><div class="result-explanation" style="margin-top:22px">'
-        f'<span class="coverage-badge {BADGE[status]}">{escape(title)}</span>'
-        f'<p style="margin-top:12px">{escape(text)}</p></div>'
-        '<table class="assess"><thead><tr><th>Condition</th><th>Your value</th><th>Tested</th><th>Status</th>'
-        '<th>What it means</th></tr></thead><tbody>'
-        + "".join(f'<tr><td><strong>{escape(r["variable"])}</strong></td><td>{escape(r["value"])}</td>'
-                  f'<td>{escape(r["tested"])}</td><td><span class="coverage-badge {BADGE[r["status"]]}">'
-                  f'{escape(r["status"])}</span></td><td>{escape(r["message"])}</td></tr>' for r in rows)
-        + '</tbody></table></div>', unsafe_allow_html=True)
+have = sizes[sizes["material"] == material]
+rows = []
+rows.append(lab_row("Material", material, ", ".join(sorted(sizes["material"].unique())),
+                    "Covered" if len(have) else "Outside",
+                    f"Measured in {', '.join(have['study'])}." if len(have) else "No smoke-size data for this material.",
+                    "None." if len(have) else "Request SAME-type measurements for your material."))
+rows.append(lab_row("Ageing time", f"{age} s", "0 s (base) and 720 s",
+                    "Covered" if age in (0, 720) else ("Partial" if 0 < age < 720 else "Outside"),
+                    "A measured condition." if age in (0, 720) else
+                    ("Between the two measured points; the curve was not measured." if age < 720
+                     else "Longer than any measured ageing."),
+                    "None." if age in (0, 720) else "Do not interpolate; measure at your ageing time."))
+g_ok = gravity == "Microgravity (ISS)"
+rows.append(lab_row("Gravity", gravity, "Microgravity (ISS)", "Covered" if g_ok else "Outside",
+                    "Matches the ISS measurements." if g_ok else "Smoke transport and particle behaviour change with gravity.",
+                    "None." if g_ok else "Show as an evidence gap."))
+status, title, text = lab_verdict(rows, have, spread=False)
+st.markdown(
+    '<div class="em"><div class="result-explanation" style="margin-top:22px">'
+    f'<span class="coverage-badge {BADGE[status]}">{escape(title)}</span>'
+    f'<p style="margin-top:12px">{escape(text)}</p></div>'
+    '<table class="assess"><thead><tr><th>Condition</th><th>Your value</th><th>Tested</th><th>Status</th>'
+    '<th>What it means</th></tr></thead><tbody>'
+    + "".join(f'<tr><td><strong>{escape(r["variable"])}</strong></td><td>{escape(r["value"])}</td>'
+              f'<td>{escape(r["tested"])}</td><td><span class="coverage-badge {BADGE[r["status"]]}">'
+              f'{escape(r["status"])}</span></td><td>{escape(r["message"])}</td></tr>' for r in rows)
+    + '</tbody></table></div>', unsafe_allow_html=True)
 
-    if len(have):
-        long = have.melt(id_vars=["study", "material"], value_vars=["base_nm", "aged_720s_nm"],
-                         var_name="condition", value_name="nm")
-        long["condition"] = long["condition"].map({"base_nm": "Base (0 s)", "aged_720s_nm": "After 720 s"})
-        chart = alt.Chart(long).mark_bar(cornerRadiusEnd=4).encode(
-            x=alt.X("study:N", title=None, axis=alt.Axis(labelAngle=0)),
-            xOffset="condition:N", y=alt.Y("nm:Q", title="Mass-mean diameter (nm)"),
-            color=alt.Color("condition:N", scale=alt.Scale(domain=["Base (0 s)", "After 720 s"],
-                            range=["#78C8C3", "#F25C05"]), title=None),
-            tooltip=["study:N", "condition:N", "nm:Q"],
-        ).properties(height=260, title=f"{material}: measured particle size")
-        st.altair_chart(dl_style(chart), width="stretch", theme=None)
-        st.caption("Mass-mean diameter only; other descriptors can move differently, and size is not toxicity or "
-                   "detector performance.")
-
+if len(have):
+    long = have.melt(id_vars=["study", "material"], value_vars=["base_nm", "aged_720s_nm"],
+                     var_name="condition", value_name="nm")
+    long["condition"] = long["condition"].map({"base_nm": "Base (0 s)", "aged_720s_nm": "After 720 s"})
+    chart = alt.Chart(long).mark_bar(cornerRadiusEnd=4).encode(
+        x=alt.X("study:N", title=None, axis=alt.Axis(labelAngle=0)),
+        xOffset="condition:N", y=alt.Y("nm:Q", title="Mass-mean diameter (nm)"),
+        color=alt.Color("condition:N", scale=alt.Scale(domain=["Base (0 s)", "After 720 s"],
+                        range=["#78C8C3", "#F25C05"]), title=None),
+        tooltip=["study:N", "condition:N", "nm:Q"],
+    ).properties(height=260, title=f"{material}: measured particle size")
+    st.altair_chart(dl_style(chart), width="stretch", theme=None)
+    st.caption("Mass-mean diameter only; other descriptors can move differently, and size is not toxicity or "
+               "detector performance.")
 
 def render_lab_tab(tests: pd.DataFrame) -> None:
-    goal = st.radio(
-        "What do you want to check?",
-        ["Flame spread on a solid material", "Smoke detection", "Fire suppression"],
-        horizontal=True, key="lab_goal",
-    )
-    if goal == "Flame spread on a solid material":
-        render_spread_lab(tests)
-    elif goal == "Smoke detection":
-        render_smoke_lab()
-    else:
-        st.markdown(
-            '<div class="em"><div class="documentary-panel"><h2>Suppression is not covered yet</h2>'
-            '<p>Suppression studies such as FLEX (dilution with CO₂ or helium) are not in the structured data '
-            'Q’AQ’ Lab holds, so Data Lab cannot assess them. This is a gap in Q’AQ’ Lab, not evidence about suppression. '
-            'Check the Library for the PSI record and its reports.</p></div></div>', unsafe_allow_html=True)
-
+goal = st.radio(
+"What do you want to check?",
+["Flame spread on a solid material", "Smoke detection", "Fire suppression"],
+horizontal=True, key="lab_goal",
+)
+if goal == "Flame spread on a solid material":
+render_spread_lab(tests)
+elif goal == "Smoke detection":
+render_smoke_lab()
+else:
+st.markdown(
+'<div class="em"><div class="documentary-panel"><h2>Suppression is not covered yet</h2>'
+'<p>Suppression studies such as FLEX (dilution with CO₂ or helium) are not in the structured data '
+'Q’AQ’ Lab holds, so Data Lab cannot assess them. This is a gap in Q’AQ’ Lab, not evidence about suppression. '
+'Check the Library for the PSI record and its reports.</p></div></div>', unsafe_allow_html=True)
 
 def render_data_lab() -> None:
-    nav = render_nav("datalab")
+nav = render_nav("datalab")
 
-    try:
-        tests = load_bassii_tests()
-    except (FileNotFoundError, ValueError) as error:
-        st.markdown(f'<div class="em">{nav}</div>', unsafe_allow_html=True)
-        st.error(str(error))
-        return
+try:
+    tests = load_bassii_tests()
+except (FileNotFoundError, ValueError) as error:
+    st.markdown(f'<div class="em">{nav}</div>', unsafe_allow_html=True)
+    st.error(str(error))
+    return
 
-    _, model_ready = ml_readiness_counts(tests)
-    header = dl_header(
-        "Data Lab",
-        "Q’AQ’ Lab’s explainable hybrid SI combines case-based reasoning and scientific expert rules. Enter your "
-        "experimental conditions to see which NASA tests are comparable, where the evidence ends, and which "
-        "test would be required next.",
-        [f"{len(tests)} BASS-II / SIBAL tests", "9 SAME / SAME-R pairs", "9 Saffire tests",
-         f"{model_ready}/{len(tests)} ML-ready targets · no invented probability"],
-    )
-    st.markdown(f'<div class="em">{nav}{header}</div>', unsafe_allow_html=True)
+_, model_ready = ml_readiness_counts(tests)
+header = dl_header(
+    "Data Lab",
+    "Q’AQ’ Lab’s explainable hybrid SI combines case-based reasoning and scientific expert rules. Enter your "
+    "experimental conditions to see which NASA tests are comparable, where the evidence ends, and which "
+    "test would be required next.",
+    [f"{len(tests)} BASS-II / SIBAL tests", "9 SAME / SAME-R pairs", "9 Saffire tests",
+     f"{model_ready}/{len(tests)} ML-ready targets · no invented probability"],
+)
+st.markdown(f'<div class="em">{nav}{header}</div>', unsafe_allow_html=True)
 
-    render_lab_tab(tests)
+render_lab_tab(tests)
 
-    st.markdown(
-        '<div class="footer">A chatbot can summarize the archive. Q’AQ’ Lab audits whether its evidence applies. '
-        'Outputs are deterministic, source-linked, and never treated as fire probabilities or safety ratings.</div>',
-        unsafe_allow_html=True,
-    )
-
+st.markdown(
+    '<div class="footer">A chatbot can summarize the archive. Q’AQ’ Lab audits whether its evidence applies. '
+    'Outputs are deterministic, source-linked, and never treated as fire probabilities or safety ratings.</div>',
+    unsafe_allow_html=True,
+)
 
 st.markdown(CSS, unsafe_allow_html=True)
 
 page = get_query_value("page", "home")
 if page == "library":
-    render_library()
+render_library()
 elif page == "explorer":
-    render_experiment_explorer()
+render_experiment_explorer()
 elif page == "accidents":
-    render_accident_cases()
+render_accident_cases()
 elif page == "datalab":
-    render_data_lab()
+render_data_lab()
 else:
-    render_home()
+render_home()
