@@ -316,11 +316,12 @@ def render_nav(active_page: str) -> str:
 hero = html(f"""
 <div class="hero">
   <div>
-    <div class="eyebrow">NASA PSI EXPERIMENTAL DATA</div>
-    <h1>Find the experiment behind the question.</h1>
-    <p class="lead">Ember is an AI-powered scientific evidence navigator that transforms NASA’s overwhelming volume of scattered microgravity combustion research into an interactive tool. We help researchers and students navigate material properties, oxygen levels, and ventilation conditions to answer a crucial question: What NASA evidence supports the safety of our experiment in a spacecraft cabin? By organizing experimental conditions and documented outcomes from the PSI (Physical Science Informatics) database, Ember eliminates the need to search through disconnected reports, empowering teams to evaluate fire safety risks in closed space habitats with confidence.</p>
+    <div class="eyebrow">EXPLAINABLE HYBRID SI · NASA PSI DATA</div>
+    <h1>Know when NASA evidence applies — and when it doesn’t.</h1>
+    <p class="lead">Ember is an evidence-coverage engine for research students. It compares a proposed combustion experiment with structured NASA PSI tests, retrieves the closest experimental cases, identifies unsupported conditions, and recommends the next test required — without generating unsupported safety predictions.</p>
     <div class="cta-row">
-      <a class="btn" href="#about">Understand Ember</a>
+      <a class="btn" href="?page=datalab" target="_self">Run an evidence audit</a>
+      <span class="scope-note">Case-based reasoning + scientific expert rules</span>
     </div>
   </div>
   <div class="visual">{load_gif_html()}</div>
@@ -330,50 +331,60 @@ hero = html(f"""
 body = html(
     """
     <div class="about" id="about">
-      <h2>From scattered reports to usable evidence</h2>
-      <p>Ember organizes experimental information from NASA’s Physical Sciences Informatics platform for research students. The prototype begins with BASS-II/SIBAL and connects variables such as material, oxygen concentration, airflow, sample geometry, sample reuse, ignition status, and documented outcome. Its purpose is to make relevant experiments easier to find and compare while keeping the original source, missing information, and limits of interpretation visible.</p>
+      <h2>A chatbot can summarize the archive. Ember audits applicability.</h2>
+      <p>A general chatbot can describe uploaded documents, but it does not automatically establish whether one experiment is comparable with a student’s exact configuration. Ember encodes that scientific protocol once: it standardizes the conditions, checks the tested domain variable by variable, retrieves comparable NASA cases, preserves page-level provenance, and abstains when the evidence cannot support a conclusion.</p>
     </div>
 
     <div class="section">
-      <div class="grid3">
+      <h2>From a question to a defensible research action</h2>
+      <div class="grid4">
         <div class="card accent">
-          <h3>Search by experimental conditions</h3>
-          <p>Locate experiments using variables such as material, oxygen concentration, airflow, geometry, ignition status, and documented outcome.</p>
+          <h3>Structured experiment</h3>
+          <p>Material, geometry, thickness, oxygen, pressure, gravity, airflow, and sample condition become one comparable research case.</p>
         </div>
         <div class="card accent">
-          <h3>Compare documented results</h3>
-          <p>Review how different experimental conditions and observed outcomes are represented in the available records without converting descriptive evidence into unsupported predictions.</p>
+          <h3>Closest NASA cases</h3>
+          <p>Case-based reasoning orders real PSI tests by exact condition matches, missing information, and normalized multivariable distance.</p>
         </div>
         <div class="card accent">
-          <h3>Keep the source visible</h3>
-          <p>Preserve the connection between every result, its original report, missing fields, and the limitations that affect its interpretation.</p>
+          <h3>Evidence boundary</h3>
+          <p>Scientific rules mark every condition as covered, partial, or outside the tested domain and prevent unsupported extrapolation.</p>
+        </div>
+        <div class="card accent">
+          <h3>Next experiment</h3>
+          <p>Every evidence gap becomes an actionable testing requirement, while the original NASA table, page, and caveats remain visible.</p>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <h2>How Ember works</h2>
-      <div class="grid3">
+      <h2>How the explainable SI works</h2>
+      <div class="grid4">
         <div class="card">
           <div class="step-n">01</div>
-          <div class="step-t">Define the conditions</div>
-          <p>Select the variables that are relevant to the research question.</p>
+          <div class="step-t">Structure</div>
+          <p>Convert heterogeneous PSI findings into a consistent experimental schema.</p>
         </div>
         <div class="card">
           <div class="step-n">02</div>
-          <div class="step-t">Review matching experiments</div>
-          <p>Examine the documented conditions, observations, and available outcomes.</p>
+          <div class="step-t">Retrieve</div>
+          <p>Find the most comparable experimental cases without hiding their differences.</p>
         </div>
         <div class="card">
           <div class="step-n">03</div>
-          <div class="step-t">Verify the evidence</div>
-          <p>Consult the source and consider missing information before drawing conclusions.</p>
+          <div class="step-t">Reason</div>
+          <p>Apply transparent domain rules to distinguish direct evidence from extrapolation.</p>
+        </div>
+        <div class="card">
+          <div class="step-n">04</div>
+          <div class="step-t">Act or abstain</div>
+          <p>Return a traceable research action, or explicitly refuse a conclusion when evidence is insufficient.</p>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <h2>Planned platform structure</h2>
+      <h2>Working prototype</h2>
       <div class="grid5">
         <div class="card plan">
           <span class="status on">Available</span>
@@ -398,12 +409,17 @@ body = html(
         <div class="card plan">
           <span class="status on">Available</span>
           <h3>Data Lab</h3>
-          <p>Explore selected records through tables and descriptive visualizations.</p>
+          <p>Audit evidence coverage and convert unsupported conditions into the next required test.</p>
         </div>
       </div>
     </div>
 
-    <div class="footer">Ember — Experimental evidence organized for research.</div>
+    <div class="scope">
+      <h2>Same conditions, same audit trail</h2>
+      <p>Ember’s scientific conclusion does not depend on how a prompt is phrased. The current prototype is deterministic, source-linked, and designed to say “insufficient evidence” instead of manufacturing certainty.</p>
+    </div>
+
+    <div class="footer">Ember — From NASA data to a defensible experiment.</div>
     """
 )
 
@@ -1778,6 +1794,27 @@ DL_GRID = "rgba(255,255,255,0.07)"
 OUTCOME_ORDER = list(DL_COLORS.keys())
 
 
+def ml_readiness_counts(frame: pd.DataFrame) -> tuple[int, int]:
+    """Return labeled targets and records explicitly eligible for modeling."""
+    if "sustained_spread_label" not in frame.columns:
+        return 0, 0
+
+    labels = frame["sustained_spread_label"].astype("string").str.strip()
+    labeled = labels.notna() & labels.ne("")
+
+    if "model_eligible" not in frame.columns:
+        return int(labeled.sum()), int(labeled.sum())
+
+    eligible = (
+        frame["model_eligible"]
+        .astype("string")
+        .str.strip()
+        .str.casefold()
+        .isin({"true", "1", "yes"})
+    )
+    return int(labeled.sum()), int((labeled & eligible).sum())
+
+
 @st.cache_data(show_spinner=False)
 def load_same_sizes() -> pd.DataFrame:
     path = DATA_DIR / "same_particle_sizes.csv"
@@ -2184,14 +2221,46 @@ def render_spread_lab(tests: pd.DataFrame) -> None:
         & (tests["sample_width_cm"] - width).abs().lt(1e-9)
         & (tests["reused_sample"] == query["reused_sample"])
     ]
+    ranked = rank_evidence_records(tests, query)
+    top = ranked.head(3)
     status, title, text = lab_verdict(rows, direct)
     n_cov = sum(r["status"] == "Covered" for r in rows)
+    gaps = [r for r in rows if r["status"] in ("Outside", "Partial")]
+    closest_case = str(top.iloc[0]["test_id"]) if not top.empty else "No comparable case"
+    labeled_targets, model_ready = ml_readiness_counts(tests)
+
+    audit_summary = "".join([
+        dl_stat("Evidence boundary", title, "Covered, partial, or outside the tested domain"),
+        dl_stat("Condition coverage", f"{n_cov}/{len(rows)} directly covered", "Audited condition by condition"),
+        dl_stat("Closest NASA case", closest_case, "Differences remain visible below"),
+        dl_stat(
+            "ML readiness",
+            f"{model_ready}/{len(tests)} eligible targets",
+            f"{labeled_targets} records contain a sustained-spread label",
+        ),
+    ])
+    st.markdown(
+        f'<div class="em"><div class="evidence-summary">{audit_summary}</div></div>',
+        unsafe_allow_html=True,
+    )
 
     st.markdown(
         '<div class="em"><div class="result-explanation" style="margin-top:22px">'
         f'<span class="coverage-badge {BADGE[status]}">{escape(title)}</span>'
-        f'<h3 style="margin-top:14px">{n_cov} of {len(rows)} conditions are directly covered</h3>'
+        f'<h3 style="margin-top:14px">Evidence Readiness Audit · {n_cov} of {len(rows)} conditions directly covered</h3>'
         f'<p>{escape(text)}</p></div></div>', unsafe_allow_html=True)
+
+    with st.expander("How the explainable hybrid SI calculated this audit"):
+        st.markdown(
+            """
+            1. **Structure:** the proposed experiment is converted into a consistent set of conditions.
+            2. **Retrieve:** BASS-II/SIBAL cases are ordered by exact matches, missing fields, and normalized distance across oxygen, airflow, width, profile, and sample condition.
+            3. **Reason:** scientific expert rules audit material, geometry, thickness, width, oxygen, pressure, gravity, flow direction, airflow, and sample history.
+            4. **Act or abstain:** any unsupported condition is exposed and converted into a testing requirement; no fire probability is generated without a defensible target label.
+
+            The same inputs always produce the same audit trail. Every displayed case remains linked to its NASA report table and page.
+            """
+        )
 
     # Per-variable table
     body = "".join(
@@ -2214,8 +2283,6 @@ def render_spread_lab(tests: pd.DataFrame) -> None:
         "flow_lo": float(min(tests["airflow_start_cm_s"].min(), tests["airflow_end_cm_s"].min())),
         "flow_hi": float(max(tests["airflow_start_cm_s"].max(), tests["airflow_end_cm_s"].max())),
     }
-    ranked = rank_evidence_records(tests, query)
-    top = ranked.head(3)
     left, right = st.columns([2, 3])
     with left:
         st.altair_chart(lab_ruler_chart(tests, s), width="stretch", theme=None)
@@ -2280,8 +2347,8 @@ def render_spread_lab(tests: pd.DataFrame) -> None:
             unsafe_allow_html=True)
 
     # Next steps + report
-    gaps = [r for r in rows if r["status"] in ("Outside", "Partial")]
-    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>What would complete the evidence</h2>'
+    st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Next experiment required</h2>'
+                '<p>Ember converts every partial or unsupported condition into an explicit research action.</p>'
                 '</div></div>', unsafe_allow_html=True)
     if gaps:
         items = "".join(
@@ -2294,12 +2361,15 @@ def render_spread_lab(tests: pd.DataFrame) -> None:
                     'reviewing PSI videos or files.</div></div></div>', unsafe_allow_html=True)
 
     report = "\n".join(
-        [f"Ember Data Lab scenario report", f"Verdict: {title}", ""]
+        ["Ember Evidence Readiness Audit", f"Verdict: {title}",
+         f"Condition coverage: {n_cov}/{len(rows)}", f"Closest NASA case: {closest_case}",
+         f"ML readiness: {model_ready}/{len(tests)} eligible targets", ""]
         + [f"- {r['variable']}: {r['value']} | tested: {r['tested']} | {r['status']} | {r['action']}" for r in rows]
         + ["", "Closest tests: " + ", ".join(top["test_id"]),
-           "Descriptive coverage only; not a fire probability or safety rating."])
-    st.download_button("Download scenario report (TXT)", report.encode("utf-8"),
-                       file_name="ember_scenario_report.txt", mime="text/plain", key="lab_dl")
+           "Method: case-based retrieval + scientific expert rules + evidence-aware abstention.",
+           "This audit is not a fire probability or safety rating."])
+    st.download_button("Download evidence audit (TXT)", report.encode("utf-8"),
+                       file_name="ember_evidence_audit.txt", mime="text/plain", key="lab_dl")
 
 
 def render_smoke_lab() -> None:
@@ -2391,20 +2461,22 @@ def render_data_lab() -> None:
         st.error(str(error))
         return
 
+    _, model_ready = ml_readiness_counts(tests)
     header = dl_header(
         "Data Lab",
-        "Enter the conditions of your experiment and see how well NASA PSI evidence covers them: which tests "
-        "match, which conditions fall outside what was tested, and what would be needed to complete the evidence.",
+        "Ember’s explainable hybrid SI combines case-based reasoning and scientific expert rules. Enter your "
+        "experimental conditions to see which NASA tests are comparable, where the evidence ends, and which "
+        "test would be required next.",
         [f"{len(tests)} BASS-II / SIBAL tests", "9 SAME / SAME-R pairs", "9 Saffire tests",
-         "Coverage of evidence, not predictions"],
+         f"{model_ready}/{len(tests)} ML-ready targets · no invented probability"],
     )
     st.markdown(f'<div class="em">{nav}{header}</div>', unsafe_allow_html=True)
 
     render_lab_tab(tests)
 
     st.markdown(
-        '<div class="footer">Data Lab is descriptive. Counts and frequencies describe designed experiments; '
-        'they are not fire probabilities, safety ratings, or predictions for conditions that were not tested.</div>',
+        '<div class="footer">A chatbot can summarize the archive. Ember audits whether its evidence applies. '
+        'Outputs are deterministic, source-linked, and never treated as fire probabilities or safety ratings.</div>',
         unsafe_allow_html=True,
     )
 
