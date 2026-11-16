@@ -12,4 +12,4 @@ When the available evidence does not cover the proposed conditions, Q’AQ’ La
 
 🔗 **Live application:** [Open Q’AQ’ Lab](https://q-aqlab.streamlit.app/)
 
-🎥 **Demo video:** [Watch the demo](https://canva.link/td42h3q7i9486v7)
+🎥 **Demo** [Watch the demo](https://canva.link/td42h3q7i9486v7)
