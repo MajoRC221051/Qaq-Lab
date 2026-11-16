@@ -317,8 +317,8 @@ hero = html(f"""
 <div class="hero">
   <div>
     <div class="eyebrow">EXPLAINABLE HYBRID SI · NASA PSI DATA</div>
-    <h1>Know when NASA evidence applies — and when it doesn’t.</h1>
-    <p class="lead">Q’AQ’ Lab is an evidence-coverage engine for research students. It compares a proposed combustion experiment with structured NASA PSI tests, retrieves the closest experimental cases, identifies unsupported conditions, and recommends the next test required — without generating unsupported safety predictions.</p>
+    <h1>Plan your experiment with what NASA already knows.</h1>
+    <p class="lead">Enter the basic conditions of your experiment, including the material, oxygen level, pressure, airflow, and gravity. Q’AQ’ Lab connects your setup with NASA studies that tested similar conditions, shows where they match or differ, and takes you back to the original source. This helps you find useful information faster and understand what may still need to be tested.</p>
     <div class="cta-row">
       <a class="btn" href="?page=datalab" target="_self">Run an evidence audit</a>
       <span class="scope-note">Case-based reasoning + scientific expert rules</span>
