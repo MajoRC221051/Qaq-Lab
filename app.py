@@ -331,8 +331,8 @@ hero = html(f"""
 body = html(
     """
     <div class="about" id="about">
-      <h2>A chatbot can summarize the archive. Q’AQ’ Lab audits applicability.</h2>
-      <p>A general chatbot can describe uploaded documents, but it does not automatically establish whether one experiment is comparable with a student’s exact configuration. Q’AQ’ Lab encodes that scientific protocol once: it standardizes the conditions, checks the tested domain variable by variable, retrieves comparable NASA cases, preserves page-level provenance, and abstains when the evidence cannot support a conclusion.</p>
+      <h2>Find the NASA research that fits your experiment</h2>
+      <p>A chatbot can summarize a report. Q’AQ’ Lab helps you see which NASA studies are actually useful for the experiment you are planning. Enter your material, oxygen level, pressure, airflow, and gravity. The app finds tests with similar conditions, shows where they match or differ, links you to the original source, and points out questions the available data cannot answer yet.</p>
     </div>
 
     <div class="section">
