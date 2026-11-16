@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(
-    page_title="Ember",
+    page_title="Q’AQ’ Lab",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -300,7 +300,7 @@ def render_nav(active_page: str) -> str:
     return html(
         f"""
         <div class="nav">
-          <span class="brand">EMBER</span>
+          <span class="brand">Q’AQ’ Lab</span>
           <div class="nav-links">
             <a class="{home_class}" href="?page=home" target="_self">Home</a>
             <a class="{library_class}" href="?page=library" target="_self">Library</a>
@@ -318,7 +318,7 @@ hero = html(f"""
   <div>
     <div class="eyebrow">EXPLAINABLE HYBRID SI · NASA PSI DATA</div>
     <h1>Know when NASA evidence applies — and when it doesn’t.</h1>
-    <p class="lead">Ember is an evidence-coverage engine for research students. It compares a proposed combustion experiment with structured NASA PSI tests, retrieves the closest experimental cases, identifies unsupported conditions, and recommends the next test required — without generating unsupported safety predictions.</p>
+    <p class="lead">Q’AQ’ Lab is an evidence-coverage engine for research students. It compares a proposed combustion experiment with structured NASA PSI tests, retrieves the closest experimental cases, identifies unsupported conditions, and recommends the next test required — without generating unsupported safety predictions.</p>
     <div class="cta-row">
       <a class="btn" href="?page=datalab" target="_self">Run an evidence audit</a>
       <span class="scope-note">Case-based reasoning + scientific expert rules</span>
@@ -331,8 +331,8 @@ hero = html(f"""
 body = html(
     """
     <div class="about" id="about">
-      <h2>A chatbot can summarize the archive. Ember audits applicability.</h2>
-      <p>A general chatbot can describe uploaded documents, but it does not automatically establish whether one experiment is comparable with a student’s exact configuration. Ember encodes that scientific protocol once: it standardizes the conditions, checks the tested domain variable by variable, retrieves comparable NASA cases, preserves page-level provenance, and abstains when the evidence cannot support a conclusion.</p>
+      <h2>A chatbot can summarize the archive. Q’AQ’ Lab audits applicability.</h2>
+      <p>A general chatbot can describe uploaded documents, but it does not automatically establish whether one experiment is comparable with a student’s exact configuration. Q’AQ’ Lab encodes that scientific protocol once: it standardizes the conditions, checks the tested domain variable by variable, retrieves comparable NASA cases, preserves page-level provenance, and abstains when the evidence cannot support a conclusion.</p>
     </div>
 
     <div class="section">
@@ -416,10 +416,10 @@ body = html(
 
     <div class="scope">
       <h2>Same conditions, same audit trail</h2>
-      <p>Ember’s scientific conclusion does not depend on how a prompt is phrased. The current prototype is deterministic, source-linked, and designed to say “insufficient evidence” instead of manufacturing certainty.</p>
+      <p>Q’AQ’ Lab’s scientific conclusion does not depend on how a prompt is phrased. The current prototype is deterministic, source-linked, and designed to say “insufficient evidence” instead of manufacturing certainty.</p>
     </div>
 
-    <div class="footer">Ember — From NASA data to a defensible experiment.</div>
+    <div class="footer">Q’AQ’ Lab — From NASA data to a defensible experiment.</div>
     """
 )
 
@@ -826,7 +826,7 @@ def resource_tags(resources_text: str) -> str:
 def investigation_card(row: pd.Series) -> str:
     record_count = int(row["ember_record_count"])
     if record_count > 0:
-        coverage = f"{record_count} structured records available in Ember"
+        coverage = f"{record_count} structured records available in Q’AQ’ Lab"
     else:
         coverage = escape(str(row["ember_status"]))
 
@@ -850,7 +850,7 @@ def investigation_card(row: pd.Series) -> str:
       <p>{escape(str(row['objective_short']))}</p>
       <div class="resource-list">{resource_tags(row['available_resources'])}</div>
       <p>Experimental table: {escape(str(row['experimental_table_status']))}</p>
-      <div class="coverage">Ember coverage: {coverage}</div>
+      <div class="coverage">Q’AQ’ Lab coverage: {coverage}</div>
       <div class="card-actions">
         <a class="source-link" href="?page=library&amp;psi={detail_id}" target="_self">View investigation</a>
         <a class="source-link secondary" href="{source_url}" target="_blank" rel="noopener noreferrer">Open in NASA PSI</a>
@@ -872,7 +872,7 @@ def detail_item(label: str, value: str) -> str:
 def render_investigation_detail(row: pd.Series) -> None:
     record_count = int(row["ember_record_count"])
     coverage = (
-        f"{record_count} structured records available in Ember"
+        f"{record_count} structured records available in Q’AQ’ Lab"
         if record_count > 0
         else str(row["ember_status"])
     )
@@ -910,7 +910,7 @@ def render_investigation_detail(row: pd.Series) -> None:
       <h2>Data availability</h2>
       <p>Experimental table: {escape(str(row['experimental_table_status']))}</p>
       <p>Modeling table: {escape(str(row['modeling_table_status']))}</p>
-      <p>Structured records in Ember: {escape(coverage)}</p>
+      <p>Structured records in Q’AQ’ Lab: {escape(coverage)}</p>
       <h2>Related investigations</h2>
       <p>{escape(str(row['related_investigations']) or 'Not reported')}</p>
       <div class="card-actions">
@@ -937,7 +937,7 @@ def render_library() -> None:
         <div class="library-header">
           <div class="eyebrow">NASA PHYSICAL SCIENCES INFORMATICS</div>
           <h1>PSI Research Library</h1>
-          <p>Browse selected NASA PSI investigations and review the evidence available for each project. Ember distinguishes between investigation metadata, reports, analyzed data, publications, and structured experimental records.</p>
+          <p>Browse selected NASA PSI investigations and review the evidence available for each project. Q’AQ’ Lab distinguishes between investigation metadata, reports, analyzed data, publications, and structured experimental records.</p>
         </div>
         """
     )
@@ -1016,7 +1016,7 @@ def render_library() -> None:
 
     with coverage_column:
         selected_coverage = st.selectbox(
-            "Structured records in Ember",
+            "Structured records in Q’AQ’ Lab",
             ["All", "Available", "Not yet curated"],
         )
 
@@ -1076,7 +1076,7 @@ def render_library() -> None:
             )
 
     st.markdown(
-        '<div class="footer">Ember — Experimental evidence organized for research.</div>',
+        '<div class="footer">Q’AQ’ Lab — Experimental evidence organized for research.</div>',
         unsafe_allow_html=True,
     )
 
@@ -1278,7 +1278,7 @@ def render_same_results(request: dict[str, object]) -> None:
       <div class="psi-id">PSI-102 · SAME</div>
       <h2>Smoke and Aerosol Measurement Experiment</h2>
       <p><strong>Evidence level:</strong> Investigation metadata and report-level evidence.</p>
-      <p><strong>Current limitation:</strong> Structured SAME run records have not been curated in this prototype, so Ember does not claim a condition-level match or generate a detector-performance prediction.</p>
+      <p><strong>Current limitation:</strong> Structured SAME run records have not been curated in this prototype, so Q’AQ’ Lab does not claim a condition-level match or generate a detector-performance prediction.</p>
       <p><strong>Related investigation:</strong> SAME-R · PSI-101.</p>
       <div class="card-actions">
         <a class="source-link" href="?page=library&amp;psi=PSI-102" target="_self">View Library record</a>
@@ -1312,7 +1312,7 @@ def render_experiment_explorer() -> None:
     <div class="explorer-header">
       <div class="eyebrow">EVIDENCE ROUTING AND COVERAGE</div>
       <h1>Experiment Explorer</h1>
-      <p>Describe the evidence you need. Ember routes the question to the relevant PSI investigation and shows which conditions are directly represented, partially represented, or outside the current prototype.</p>
+      <p>Describe the evidence you need. Q’AQ’ Lab routes the question to the relevant PSI investigation and shows which conditions are directly represented, partially represented, or outside the current prototype.</p>
       <div class="dataset-strip">
         <span class="dataset-stat">{len(tests)} BASS-II / SIBAL records</span>
         <span class="dataset-stat">O₂ {oxygen_min:.1f}–{oxygen_max:.1f} vol. %</span>
@@ -1532,7 +1532,7 @@ def render_experiment_explorer() -> None:
             render_same_results(submitted)
 
     st.markdown(
-        '<div class="footer">Ember — Evidence routing without unsupported prediction.</div>',
+        '<div class="footer">Q’AQ’ Lab — Evidence routing without unsupported prediction.</div>',
         unsafe_allow_html=True,
     )
 
@@ -1646,7 +1646,7 @@ def render_accident_cases() -> None:
     <div class="cases-header">
       <div class="eyebrow">DOCUMENTED OPERATIONAL CONTEXT</div>
       <h1>Accident Cases</h1>
-      <p>Explore documented spacecraft incidents and ground-test failures. Ember separates historical facts, operational lessons, and experimental evidence so case narratives are not treated as probabilities or training labels.</p>
+      <p>Explore documented spacecraft incidents and ground-test failures. Q’AQ’ Lab separates historical facts, operational lessons, and experimental evidence so case narratives are not treated as probabilities or training labels.</p>
       <div class="dataset-strip">
         <span class="dataset-stat">{len(cases)} NASA-documented cases</span>
         <span class="dataset-stat">Historical evidence</span>
@@ -2134,7 +2134,7 @@ def lab_verdict(rows: list[dict], direct: pd.DataFrame, spread: bool = True) -> 
     if "Outside" in statuses:
         outs = ", ".join(r["variable"].lower() for r in rows if r["status"] == "Outside")
         return ("Outside", "Outside the tested domain",
-                f"These conditions are not represented in the PSI subset Ember holds: {outs}. "
+                f"These conditions are not represented in the PSI subset Q’AQ’ Lab holds: {outs}. "
                 "The tests below can inform mechanisms at most; they cannot support conclusions for your scenario.")
     if "Partial" in statuses or direct.empty:
         return ("Partial", "Partial coverage",
@@ -2182,7 +2182,7 @@ def lab_ruler_chart(tests: pd.DataFrame, s: dict):
 def render_spread_lab(tests: pd.DataFrame) -> None:
     st.markdown(
         '<div class="em"><div class="question-intro"><h2>Describe your experiment</h2>'
-        '<p>Enter the conditions you plan to use. Ember compares each one with the tested domain and finds the '
+        '<p>Enter the conditions you plan to use. Q’AQ’ Lab compares each one with the tested domain and finds the '
         'closest PSI tests. It judges how well the evidence covers your conditions, not whether they are safe.</p>'
         '</div></div>', unsafe_allow_html=True)
 
@@ -2322,7 +2322,7 @@ def render_spread_lab(tests: pd.DataFrame) -> None:
     saffire = load_saffire()
     related = saffire[saffire["material"] == key] if key else saffire.iloc[0:0]
     if related.empty:
-        st.info("Ember has no related larger-scale record for this material. That is an evidence gap, not a "
+        st.info("Q’AQ’ Lab has no related larger-scale record for this material. That is an evidence gap, not a "
                 "sign of low risk.")
     else:
         view = related[["investigation", "test_id", "material", "flow_cm_s", "flow_direction",
@@ -2348,7 +2348,7 @@ def render_spread_lab(tests: pd.DataFrame) -> None:
 
     # Next steps + report
     st.markdown('<div class="em"><div class="question-intro" style="margin-top:34px"><h2>Next experiment required</h2>'
-                '<p>Ember converts every partial or unsupported condition into an explicit research action.</p>'
+                '<p>Q’AQ’ Lab converts every partial or unsupported condition into an explicit research action.</p>'
                 '</div></div>', unsafe_allow_html=True)
     if gaps:
         items = "".join(
@@ -2361,7 +2361,7 @@ def render_spread_lab(tests: pd.DataFrame) -> None:
                     'reviewing PSI videos or files.</div></div></div>', unsafe_allow_html=True)
 
     report = "\n".join(
-        ["Ember Evidence Readiness Audit", f"Verdict: {title}",
+        ["Q’AQ’ Lab Evidence Readiness Audit", f"Verdict: {title}",
          f"Condition coverage: {n_cov}/{len(rows)}", f"Closest NASA case: {closest_case}",
          f"ML readiness: {model_ready}/{len(tests)} eligible targets", ""]
         + [f"- {r['variable']}: {r['value']} | tested: {r['tested']} | {r['status']} | {r['action']}" for r in rows]
@@ -2369,7 +2369,7 @@ def render_spread_lab(tests: pd.DataFrame) -> None:
            "Method: case-based retrieval + scientific expert rules + evidence-aware abstention.",
            "This audit is not a fire probability or safety rating."])
     st.download_button("Download evidence audit (TXT)", report.encode("utf-8"),
-                       file_name="ember_evidence_audit.txt", mime="text/plain", key="lab_dl")
+                       file_name="qaq_lab_evidence_audit.txt", mime="text/plain", key="lab_dl")
 
 
 def render_smoke_lab() -> None:
@@ -2447,7 +2447,7 @@ def render_lab_tab(tests: pd.DataFrame) -> None:
         st.markdown(
             '<div class="em"><div class="documentary-panel"><h2>Suppression is not covered yet</h2>'
             '<p>Suppression studies such as FLEX (dilution with CO₂ or helium) are not in the structured data '
-            'Ember holds, so Data Lab cannot assess them. This is a gap in Ember, not evidence about suppression. '
+            'Q’AQ’ Lab holds, so Data Lab cannot assess them. This is a gap in Q’AQ’ Lab, not evidence about suppression. '
             'Check the Library for the PSI record and its reports.</p></div></div>', unsafe_allow_html=True)
 
 
@@ -2464,7 +2464,7 @@ def render_data_lab() -> None:
     _, model_ready = ml_readiness_counts(tests)
     header = dl_header(
         "Data Lab",
-        "Ember’s explainable hybrid SI combines case-based reasoning and scientific expert rules. Enter your "
+        "Q’AQ’ Lab’s explainable hybrid SI combines case-based reasoning and scientific expert rules. Enter your "
         "experimental conditions to see which NASA tests are comparable, where the evidence ends, and which "
         "test would be required next.",
         [f"{len(tests)} BASS-II / SIBAL tests", "9 SAME / SAME-R pairs", "9 Saffire tests",
@@ -2475,7 +2475,7 @@ def render_data_lab() -> None:
     render_lab_tab(tests)
 
     st.markdown(
-        '<div class="footer">A chatbot can summarize the archive. Ember audits whether its evidence applies. '
+        '<div class="footer">A chatbot can summarize the archive. Q’AQ’ Lab audits whether its evidence applies. '
         'Outputs are deterministic, source-linked, and never treated as fire probabilities or safety ratings.</div>',
         unsafe_allow_html=True,
     )
